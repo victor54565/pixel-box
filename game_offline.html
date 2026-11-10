@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Пиксель Бокс">
@@ -226,6 +226,135 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .tiny{font-family:var(--px);font-size:7px;color:var(--muted);line-height:1.8;margin:0 0 8px}
 @media (max-height:560px){.logo{font-size:16px}.cb{width:58px;height:58px}.dpad{grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px)}.dpad .cb.pd{width:50px;height:50px}#hint{display:none}}
 @media (prefers-reduced-motion:reduce){.ft{animation-duration:.01s}}
+/*THEME-START*/
+/* ===== безопасные зоны (чёлка, статус-бар) ===== */
+.screen{padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))}
+.top{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) 0 max(10px,env(safe-area-inset-left))}
+#tsBtn{top:calc(max(10px,env(safe-area-inset-top)) + 56px);left:max(10px,env(safe-area-inset-left))}
+.trainbar{top:calc(max(10px,env(safe-area-inset-top)) + 94px)}
+#ctl{padding:0 max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+#fgrid{right:max(12px,env(safe-area-inset-right));bottom:max(20px,env(safe-area-inset-bottom))}
+#stick{left:max(16px,env(safe-area-inset-left));bottom:max(30px,env(safe-area-inset-bottom))}
+
+/* ===== размер кнопок и раскладка для левши ===== */
+#hud{--cs:1;--ba:.46}
+#ctl .dpad{transform:scale(var(--cs));transform-origin:left bottom}
+#specials{transform:scale(var(--cs));transform-origin:right bottom}
+#fgrid{transform:scale(var(--cs));transform-origin:right bottom}
+#hud.lefty #ctl{flex-direction:row-reverse}
+#hud.lefty #ctl .dpad{transform-origin:right bottom}#hud.lefty #specials{transform-origin:left bottom}
+#hud.lefty #fgrid{right:auto;left:max(12px,env(safe-area-inset-left));transform-origin:left bottom}
+#hud.lefty #sZone{left:auto;right:0}
+#hud.lefty #stick{left:auto;right:max(16px,env(safe-area-inset-right))}
+
+/* ===== стеклянная тема: серые полупрозрачные кнопки ===== */
+#hud .cb,#hud #fgrid .cb{
+ border:1.5px solid rgba(255,255,255,.34);border-radius:16px;color:#f1f3f8;text-shadow:0 1px 2px rgba(0,0,0,.85);
+ background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.04) 48%,rgba(0,0,0,.14)),rgba(28,31,40,var(--ba));
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -8px 14px rgba(0,0,0,.2),0 3px 10px rgba(0,0,0,.45);
+ -webkit-backdrop-filter:blur(8px) saturate(1.1);backdrop-filter:blur(8px) saturate(1.1);filter:none;
+}
+#hud .cb .ico{filter:drop-shadow(0 1px 2px rgba(0,0,0,.75))}
+#hud .cb:active,#hud .cb.down{transform:scale(.93);filter:none;
+ background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,.14) 50%,rgba(255,255,255,.06)),rgba(60,64,76,.7);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 4px rgba(0,0,0,.5)}
+#hud #fgrid .cb.fj{background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,.1) 50%,rgba(0,0,0,.08)),rgba(60,64,76,var(--ba));border-color:rgba(255,255,255,.5)}
+#hud .cb.sp.buff.ready,#hud .cb.sp.rage.ready{border-color:rgba(255,255,255,.85)}
+#hud .cb.sp.off{opacity:.45;filter:none}
+#hud .cb .cd{background:rgba(0,0,0,.55)}
+.mini{border:1.5px solid rgba(255,255,255,.3);border-radius:10px;background:rgba(32,35,44,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 8px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#f1f3f8}
+.mini.on,#tsBtn.slow{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.6);color:#fff}
+#stick{background:radial-gradient(circle,rgba(255,255,255,.08),rgba(30,33,42,.34) 72%);border:1.5px solid rgba(255,255,255,.36);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 3px 12px rgba(0,0,0,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#stick::before{border:1.5px dashed rgba(255,255,255,.22)}
+#stick i{background:radial-gradient(circle at 35% 28%,rgba(255,255,255,.65),rgba(255,255,255,.22) 70%);border:1.5px solid rgba(255,255,255,.65);box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.7)}
+#stick.on{background:radial-gradient(circle,rgba(255,255,255,.16),rgba(40,44,56,.42) 72%)}
+
+/* ===== стекло в меню и экранах ===== */
+.btn,.btn.alt,.btn.red{color:#f4f6fb;text-shadow:0 1px 2px rgba(0,0,0,.7);border:1.5px solid rgba(255,255,255,.3);border-radius:12px;
+ background:rgba(36,40,52,.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 4px 12px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.btn:not(.alt){background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,.12));border-color:rgba(255,255,255,.55)}
+.btn:active,.btn.alt:active,.btn.red:active{transform:scale(.97);background:rgba(255,255,255,.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 4px rgba(0,0,0,.4)}
+.btn.alt{background:rgba(30,33,43,.6)}
+.chip,.opp,.money,.tcard,.floor,.trow,.crow,.ldrow,.pcard,.lkbody,#det,.stCard,#treeBox,.rlWin{
+ background:rgba(22,25,34,.62);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 3px 10px rgba(0,0,0,.3);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.stCard{border-color:var(--rc,rgba(255,255,255,.3));box-shadow:inset 0 0 0 1px var(--rc,transparent),0 3px 10px rgba(0,0,0,.3)}
+.floor.cur,.trow.me{border-color:var(--gold)}
+.opt,.tab,.hdr .back,.stTabs button,.crow button,.ldrow button,.stCell{
+ background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.24);border-radius:9px;color:#e5e8f2;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.18);text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.stCell{box-shadow:inset 0 0 0 1px var(--rc),inset 0 1px 0 rgba(255,255,255,.18)}
+.opt.on,.tab.on,.stTabs button.on,.crow button.on,.ldrow button.on{background:rgba(255,255,255,.3);border-color:rgba(255,255,255,.7);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.tab.on{box-shadow:inset 0 -3px 0 var(--c)}
+.in{background:rgba(10,12,18,.6);border:1.5px solid rgba(255,255,255,.28);border-radius:9px;box-shadow:none}
+.hdr .back{border-radius:12px}
+.screen.solid{background:rgba(8,10,18,.9)}
+.msg{color:#cfe8d8}
+
+/* ===== экран настроек ===== */
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;margin-bottom:8px;background:rgba(22,25,34,.62);border:1.5px solid rgba(255,255,255,.2);border-radius:10px}
+.srow>b{font-family:var(--px);font-weight:400;font-size:8px;line-height:1.5;color:var(--fg);flex:1;min-width:0}
+.seg{display:flex;gap:4px;flex:none}
+.seg button{font-family:var(--px);font-size:7px;padding:9px 8px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.24);border-radius:8px;color:#d9dcea}
+.seg button.on{background:rgba(255,255,255,.32);border-color:rgba(255,255,255,.75);color:#fff}
+.sh{font-family:var(--px);font-size:8px;color:var(--muted);margin:12px 0 8px;grid-column:1/-1}
+.sbtns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;grid-column:1/-1}
+.sbtns .btn{margin:0;flex:1;min-width:130px}
+.bk{width:100%;min-height:62px;background:rgba(10,12,18,.6);border:1.5px solid rgba(255,255,255,.26);border-radius:9px;color:#dfe3f2;font-family:'Courier New',monospace;font-size:10px;padding:8px;outline:none;resize:none;user-select:text;-webkit-user-select:text;grid-column:1/-1}
+.rotHint{font-family:var(--px);font-size:7px;color:rgba(255,255,255,.75);text-shadow:0 1px 3px #000;text-align:center;padding-bottom:6px;transition:opacity .4s}
+.rotz{display:flex;align-items:flex-end;justify-content:center;touch-action:pan-y}
+.screen.rotd .rotHint{opacity:0}
+
+/* ===== горизонтальная раскладка ===== */
+#menu .mL{display:flex;flex-direction:column;flex:1;min-height:0}
+@media (orientation:landscape){
+ .screen{left:50%;width:min(100%,1100px)}
+ #menu{display:grid;grid-template-columns:minmax(0,37%) minmax(0,1fr) minmax(0,43%);column-gap:10px;
+  background:linear-gradient(90deg,rgba(8,10,22,.86),rgba(8,10,22,.12) 40%,rgba(8,10,22,.12) 54%,rgba(8,10,22,.86))}
+ #menu .mL{grid-column:1;justify-content:space-between}
+ #menu .mR{grid-column:3;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:center}
+ #menu .mR .two{display:contents}
+ #menu .mR .btn{margin:0;font-size:9px;padding:13px 4px;line-height:1.3}
+ #menu #mSet{grid-column:1/-1}
+ #menu .logo{font-size:19px;margin:0}
+ #menu .logo small{font-size:7px;margin-top:6px}
+ #menu .stats{margin-bottom:6px}
+ #menu .chip{padding:6px 8px}
+ #menu .opp{font-size:7px;line-height:1.6;margin:0;padding:8px 10px}
+ #mode{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;align-content:start;grid-auto-rows:min-content}
+ #mode .hdr,#mode .opp,#mode .tsec{grid-column:1/-1;margin-bottom:0}
+ #mode .tcard{margin:0;height:100%}
+ #up{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;gap:6px 12px}
+ #up .hdr,#up .tabs{grid-column:1/-1;margin-bottom:0}
+ #up #treeBox{grid-column:1;grid-row:3/5;min-height:0}
+ #up #det{grid-column:2;grid-row:3;margin:0;min-height:0;overflow:auto}
+ #up .two{grid-column:2;grid-row:4;margin:0!important}
+ #look,#sty{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,54%);grid-template-rows:auto auto minmax(0,1fr);column-gap:14px;row-gap:6px}
+ #look .hdr,#sty .hdr{grid-column:1/-1;margin-bottom:0}
+ #look .grow,#sty .grow{grid-column:1;grid-row:2/4;min-height:0}
+ #look .tabs{grid-column:2;grid-row:2;margin:0;background:rgba(12,14,20,.62);border-radius:10px;padding:5px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+ #look .lkbody{grid-column:2;grid-row:3;max-height:none;min-height:0;margin:0}
+ #sty .stTabs{grid-column:2;grid-row:2;margin:0}
+ #sty #stBody{grid-column:2;grid-row:3;overflow-y:auto;min-height:0;touch-action:pan-y}
+ #pro .hdr{margin-bottom:4px}
+ #cheat #chList,#load #ldList{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;align-content:start}
+ #result{justify-content:center;align-items:center;text-align:center}
+ #result .grow{display:none}
+ #result .btn,#result .two{width:min(100%,420px)}
+ #setBody{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-content:start}
+ .srow{margin-bottom:6px}
+}
+@media (orientation:landscape) and (max-height:520px){
+ .hdr{margin-bottom:6px}.hdr h2{font-size:11px}.hdr .back{width:36px;height:36px}.money{padding:7px 8px;font-size:9px}
+ .tsec{margin:2px 0 4px}
+ .tcard{padding:8px;margin-bottom:6px}
+ .stCard h3{font-size:11px}.stCard p{font-size:11px;line-height:1.3}
+ .pcard{max-height:none}
+ #pro.shade .pcard{max-height:62vh}
+}
+@media (orientation:landscape){#pro.shade #prBody{width:54%;margin-left:auto}
+ #sty.shade,#pro.shade{background:linear-gradient(90deg,rgba(8,10,22,.05),rgba(8,10,22,.5) 40%,rgba(8,10,22,.86))}}
+/*THEME-END*/
 </style>
 
 <div id="app">
@@ -271,25 +400,28 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
   </div>
 
   <div id="menu" class="screen shade">
-    <h1 class="logo">ПИКСЕЛЬ<br>БОКС<small>3D бои один на один</small></h1>
-    <div class="grow"></div>
-    <div class="stats">
-      <div class="chip"><em>ДЕНЬГИ</em><b id="mMoney">0</b></div>
-      <div class="chip"><em>ПОБЕД</em><b id="mW">0</b></div>
-      <div class="chip"><em>ПОРАЖЕНИЙ</em><b id="mL">0</b></div>
+    <div class="mL">
+      <h1 class="logo">ПИКСЕЛЬ<br>БОКС<small>3D бои один на один</small></h1>
+      <div class="grow"></div>
+      <div class="stats">
+        <div class="chip"><em>ДЕНЬГИ</em><b id="mMoney">0</b></div>
+        <div class="chip"><em>ПОБЕД</em><b id="mW">0</b></div>
+        <div class="chip"><em>ПОРАЖЕНИЙ</em><b id="mL">0</b></div>
+      </div>
+      <div class="opp" id="mOpp"></div>
     </div>
-    <div class="opp" id="mOpp"></div>
-    <div class="two"><button class="btn" id="mFight">БЫСТРЫЙ МАТЧ</button><button class="btn red" id="mTour">ТУРНИРЫ</button></div>
-    <div class="two"><button class="btn" id="mPro" style="background:#e8e8ee;box-shadow:inset 0 -5px 0 #9aa0b8,0 5px 0 #000">ПРО-РЕЙТИНГ</button><button class="btn" id="mSty" style="background:#b05cff;box-shadow:inset 0 -5px 0 #7a30c8,0 5px 0 #000;color:#fff">СТИЛИ БОЯ</button></div>
-    <div class="two"><button class="btn alt" id="mTrain">ТРЕНИРОВКА</button><button class="btn alt" id="mLook">ОБЛИК</button></div>
-    <div class="two"><button class="btn alt" id="mUp">ПРОКАЧКА</button><button class="btn alt" id="mLoad">СПЕЦУДАРЫ</button></div>
-    <div class="set">
-      <button class="btn alt sm" id="sPix">ПИКСЕЛИ</button>
-      <button class="btn alt sm" id="sSwap">СВАЙПЫ</button>
-      <button class="btn alt sm" id="mCheat">ЧИТЫ</button>
-      <button class="btn alt sm" id="sFull">ПОЛНЫЙ ЭКРАН</button>
-      <button class="btn alt sm" id="sReset">СБРОС</button>
+    <div class="mR">
+      <div class="two"><button class="btn" id="mFight">БЫСТРЫЙ МАТЧ</button><button class="btn" id="mTour">ТУРНИРЫ</button></div>
+      <div class="two"><button class="btn" id="mPro">ПРО-РЕЙТИНГ</button><button class="btn" id="mSty">СТИЛИ БОЯ</button></div>
+      <div class="two"><button class="btn alt" id="mTrain">ТРЕНИРОВКА</button><button class="btn alt" id="mLook">ОБЛИК</button></div>
+      <div class="two"><button class="btn alt" id="mUp">ПРОКАЧКА</button><button class="btn alt" id="mLoad">СПЕЦУДАРЫ</button></div>
+      <button class="btn alt" id="mSet">НАСТРОЙКИ</button>
     </div>
+  </div>
+
+  <div id="set" class="screen solid" hidden>
+    <div class="hdr"><button class="back" id="setBack" data-ico="left"></button><h2>НАСТРОЙКИ</h2><div class="money" id="setVer"></div></div>
+    <div class="scroll" id="setBody"></div>
   </div>
 
   <div id="mode" class="screen solid" hidden>
@@ -307,13 +439,13 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 
   <div id="pro" class="screen shade" hidden>
     <div class="hdr"><button class="back" id="prBack" data-ico="left"></button><h2 id="prTitle">ПРО-РЕЙТИНГ</h2><div class="money" id="prMoney">0</div></div>
-    <div class="grow"></div>
+    <div class="grow rotz"></div>
     <div id="prBody"></div>
   </div>
 
   <div id="sty" class="screen shade" hidden>
     <div class="hdr"><button class="back" id="stBack" data-ico="left"></button><h2>СТИЛИ БОЯ</h2><div class="money" id="stMoney">0</div></div>
-    <div class="grow"></div>
+    <div class="grow rotz"></div>
     <div class="stTabs" id="stTabs"></div>
     <div id="stBody"></div>
   </div>
@@ -336,7 +468,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 
   <div id="look" class="screen" hidden>
     <div class="hdr"><button class="back" id="lkBack" data-ico="left"></button><h2>ОБЛИК</h2><button class="btn alt sm" id="lkRand" style="flex:none;width:auto">СЛУЧАЙНО</button></div>
-    <div class="grow"></div>
+    <div class="grow rotz"><span class="rotHint">ТЯНИ ПАЛЬЦЕМ, ЧТОБЫ КРУТИТЬ БОЙЦА</span></div>
     <div class="tabs" id="lkTabs"></div>
     <div class="lkbody" id="lkBody"></div>
   </div>
@@ -412,6 +544,7 @@ try{const s=localStorage.getItem(SAVE_KEY);if(s)Object.assign(save,JSON.parse(s)
 function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(e){}}
 if(save.pix>10)save.pix=save.pix<=250?4:save.pix<=350?3:2;
 if(![2,3,4].includes(save.pix))save.pix=3;
+save.opt=Object.assign({sound:1,vol:2,shake:2,fx:1,bsz:1,bal:1,lefty:0,hints:1},save.opt||{});
 save.styles=save.styles||[];save.style=save.style||'orth';save.up=save.up||{};save.free=save.free||{};save.cheats=save.cheats||{};save.loadout=save.loadout||[];
 if(save.up.speed){for(let l=save.up.speed;l>0;l--)save.money+=Math.round(120*(1+.6*(l-1)));delete save.up.speed}
 
@@ -680,6 +813,7 @@ function locOf(sp){return sp.theme!=null?sp.theme:themeIdx(COUNTRY_LOC[oppCC(sp)
 /* ========== audio ========== */
 let AC=null;
 function sfx(kind){
+ if(!save.opt.sound)return;
  try{
   if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();
   if(AC.state==='suspended')AC.resume();
@@ -690,7 +824,7 @@ function sfx(kind){
   o.type=P[2];o.frequency.setValueAtTime(P[0],t);
   if(kind==='whoosh'||kind==='dodge')o.frequency.exponentialRampToValueAtTime(P[0]*.4,t+P[1]);
   if(kind==='hit'||kind==='heavy'||kind==='ko')o.frequency.exponentialRampToValueAtTime(P[0]*.3,t+P[1]);
-  g.gain.setValueAtTime(P[3],t);g.gain.exponentialRampToValueAtTime(.001,t+P[1]);
+  g.gain.setValueAtTime(P[3]*[.35,.65,1][save.opt.vol],t);g.gain.exponentialRampToValueAtTime(.001,t+P[1]);
   o.start(t);o.stop(t+P[1]+.02);
  }catch(e){}
 }
@@ -889,6 +1023,7 @@ function enemyStyle(sp){
  const pool=STYLES.filter(s=>s.r<=maxR);
  return pool[Math.floor(rr()*pool.length)];
 }
+let lookRot=0,lookVel=0,lookAuto=true,lkPtr=null;
 /* ========== АНИМАЦИИ СТИЛЕЙ: удары, движение, спец-приёмы, эффекты ========== */
 /* дельты поз: ax,ay,az,ae — бьющая рука; ox,oy,oz,oe — вторая рука; ty,tz,hy,hz зеркалятся по руке; tx,hx,dy,lunge как есть
    W — замах, K — удар. ax>0 опускает руку, ay>0 уводит наружу */
@@ -1070,6 +1205,7 @@ function fxLines(pos,col,n,len){
  }
 }
 function fxRun(h,pos){
+ if(!save.opt.fx)return;
  const col=h.col||0xffffff,list=String(h.fx).split(',');
  for(const k of list){
   if(k==='ring'){fxRing(pos,col,1.5,.45);fxRing(pos,0xffffff,.9,.3)}
@@ -1081,6 +1217,7 @@ function fxRun(h,pos){
  burst(pos,10,[col,0xffffff],5.5);
 }
 function castFx(c,d){
+ if(!save.opt.fx){c.castT=.7;c.castDur=.7;c.castA=d.buf&&d.buf.cast||'roar';c.castCol=d.col||0xb57bff;return}
  const pos=headPos(c);pos.y-=.5;
  const col=d.col||0xb57bff;
  fxRing(pos,col,2.2,.6);fxRing(pos,0xffffff,1.3,.4);burst(pos,14,[col,0xffffff],4);fxFlash(col,.22);
@@ -2342,7 +2479,7 @@ function animEnt(c,dt){
  const bk=c.state==='dodge'&&c.dodge?(c.dodge.back?.55:(c.dodge.fwd?-.35:0)):0;
  c.bo=(c.bo||0)+(bk-(c.bo||0))*(1-Math.exp(-dt*12));
  if(lookMode&&(c.isP===(lookT==='P'))){
-  f.holder.position.set(0,0,0);f.holder.rotation.y=timeNow*.7;c.offX=0;
+  f.holder.position.set(0,0,0);f.holder.rotation.y=lookRot;c.offX=0;
  }else if(G&&G.free&&c.fx!==undefined){
   const dx=Math.sin(c.hd),dz=Math.cos(c.hd);c.face=[dx,dz];
   const th=Math.atan2(c.dir*dx,c.dir*dz);
@@ -2405,14 +2542,16 @@ function animEnt(c,dt){
 const camPos=new THREE.Vector3(0,2.4,5.5),camLook=new THREE.Vector3(0,1,0),tPos=new THREE.Vector3(),tLook=new THREE.Vector3();
 function updCamera(raw){
  const port=camera.aspect<.8;
- if(lookMode){tPos.set(lookSide,port?1.6:1.2,port?3.2:2.9);tLook.set(lookSide,(port?.55:.45)-lookUp,0)}
+ if(lookMode){if(!lkPtr){lookRot+=lookVel*raw+(lookAuto?raw*.7:0);lookVel*=Math.exp(-raw*2.2)}
+  const ls=lkScale();tPos.set(lookSide,port?1.6:1.4*ls,port?3.2:3.7*ls);tLook.set(lookSide,(port?.55:.62*ls)-lookUp,0)}
  else if(!G||G.mode==='end'){
   const a=Math.sin(timeNow*.25)*.8;
   tPos.set(Math.sin(a)*5.4,2.3,Math.cos(a)*5.4);tLook.set(0,.9,0);
   if(port)tPos.multiplyScalar(1.15);
  }else if(G.mode==='ko'&&G.byKO){
   const l=G.win?E:P;l.f.holder.getWorldPosition(_hp);
-  tPos.set(_hp.x+2.6,1.4,_hp.z+.4);tLook.set(_hp.x,.8,_hp.z);
+  const ku=clamp(G.t/2.4,0,1),ke=eo(ku),kd=(2.7+2.9*ke)*(port?1.5:1);
+  tPos.set(_hp.x+kd,1.4+1.1*ke,_hp.z+.4+1.1*ke);tLook.set(_hp.x,.8-.22*ke,_hp.z);
  }else{
   tPos.set((port?1.0:1.2)+P.offX*.3+Math.sin(timeNow*.4)*.1,(port?2.15:2.05)+(P.f.hs-1)*.8+.06*(P.f.look.muscle||0)+Math.sin(timeNow*.5)*.04,(port?3.0:2.75)+.12*(P.f.look.muscle||0));
   tLook.set(-.12+E.f.holder.position.x*.35,(port?1.62:1.55)+(E.f.hs-1)*.7,-.75);
@@ -2428,7 +2567,8 @@ function updCamera(raw){
  const k=1-Math.exp(-raw*(lookMode?6:(G&&G.free?8:3.6)));
  camPos.lerp(tPos,k);camLook.lerp(tLook,k);
  shake=Math.max(0,shake-raw*1.6);
- camera.position.set(camPos.x+(Math.random()-.5)*shake*.35,camPos.y+(Math.random()-.5)*shake*.35,camPos.z);
+ const shk=[0,.55,1][save.opt.shake];
+ camera.position.set(camPos.x+(Math.random()-.5)*shake*.35*shk,camPos.y+(Math.random()-.5)*shake*.35*shk,camPos.z);
  camera.lookAt(camLook);
  if(G&&G.free&&!lookMode)ringVis(camera.position);
 }
@@ -2465,7 +2605,7 @@ function updHud(){
   el.warn.className='on '+h.kind;
   el.warn.textContent=G.free?(h.kind==='upp'?'АППЕРКОТ! БЛОК ИЛИ ОТОЙДИ!':h.kind==='hook'?'ХУК! ОТОЙДИ ИЛИ УКЛОН':'ДЖЕБ! ОТОЙДИ ИЛИ БЛОК'):h.kind==='jab'?'ДЖЕБ! УКЛОН ИЛИ БЛОК':h.kind==='hook'?(h.dodgeDir<0?'ХУК! УКЛОН ВЛЕВО':'ХУК! УКЛОН ВПРАВО'):'АППЕРКОТ! БЛОК!';
  }else el.warn.className='';
- const showHint=G.hintT>0&&(save.wins<2||G.training||G.free)&&G.mode==='fight';
+ const showHint=save.opt.hints&&G.hintT>0&&(save.wins<2||G.training||G.free)&&G.mode==='fight';
  el.hint.innerHTML=showHint&&G.free?'СТИК — ХОДЬБА ПО РИНГУ<br>КНОПКИ СПРАВА — УДАРЫ<br>РЫВОК: СТИК ВБОК ИЛИ ВПЕРЁД · БЕЗ СТИКА — ОТКЛОН<br>УДАР РАБОТАЕТ, ТОЛЬКО ЕСЛИ ВРАГ БЛИЗКО':showHint?'ТАП — ДЖЕБ<br>'+(save.swap?'СВАЙП ВНИЗ — ДЖЕБ · ВВЕРХ — АППЕРКОТ':'СВАЙП ВВЕРХ — ДЖЕБ · ВНИЗ — АППЕРКОТ')+'<br>СВАЙП ВЛЕВО / ВПРАВО — ХУК':'';
  for(const id of spIds){
   const b=document.getElementById(G.free?'fs_s'+spIds.indexOf(id):'sp_'+id);if(!b)continue;
@@ -2576,10 +2716,11 @@ function applyTs(){const b=$('#tsBtn');b.textContent='ВРЕМЯ ×'+save.ts;b.c
 function cycleTs(){const i=TSV.indexOf(save.ts);save.ts=TSV[(i+1)%TSV.length];persist();applyTs()}
 $('#tsBtn').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();cycleTs()});
 /* ========== screens ========== */
-const SCREENS=['menu','up','cheat','result','look','load','tour','mode','pro','sty'];
+const SCREENS=['menu','up','cheat','result','look','load','tour','mode','pro','sty','set'];
 function applyVis(){if(P)P.f.holder.visible=!(lookMode&&lookT==='E');if(E)E.f.holder.visible=!lookMode||lookT==='E'}
 function show(id){
  lookMode=(id==='look'||id==='pro'||id==='sty');if(id!=='pro'){lookT='P';lookUp=0;lookSide=0}
+ lookAuto=true;lookVel=0;lkPtr=null;SCREENS.forEach(x=>$('#'+x).classList.remove('rotd'));
  SCREENS.forEach(s=>{$('#'+s).hidden=s!==id});$('#hud').hidden=true;
  applyVis();
 }
@@ -2590,8 +2731,6 @@ function refreshMenu(){
  $('#mMoney').textContent=moneyTxt();$('#mW').textContent=save.wins;$('#mL').textContent=save.losses;
  $('#mOpp').innerHTML='СЛЕДУЮЩИЙ СОПЕРНИК<br><span class="lv">'+(sp.boss?'БОСС · ':'')+'УР.'+sp.level+'</span> '+flagHTML(oppCC(sp))+E.name+'<br>'+COUNTRIES[oppCC(sp)].n.toUpperCase()+' · '+THEMES[locOf(sp)].name.toUpperCase();
  const bl=save.belts.length;$('#mTour').textContent=save.tour?'ТУРНИР '+save.tour.f+'/'+TOURS[save.tour.i].floors:'ТУРНИРЫ';
- $('#sPix').textContent='ПИКСЕЛИ: '+PIXN[save.pix];
- $('#sSwap').textContent=save.swap?'АППЕРКОТ: ВВЕРХ':'АППЕРКОТ: ВНИЗ';
 }
 function goMenu(){tourMode=false;freeMode=false;proMode=false;proOpp=null;setupScene();show('menu');refreshMenu()}
 function fightNow(train){show('none');$('#hud').hidden=false;startFight(train)}
@@ -2607,37 +2746,13 @@ $('#rNext').onclick=()=>{if(proMode){openPro();return}if(tourMode&&!save.tour){o
 $('#rMenu').onclick=goMenu;
 $('#rUp').onclick=()=>{setupScene();openUp()};
 $('#mUp').onclick=openUp;
-$('#mCheat').onclick=openCheat;
 $('#mLook').onclick=openLook;
 $('#mLoad').onclick=openLoad;
-['upBack','chBack','lkBack','ldBack'].forEach(id=>$('#'+id).onclick=goMenu);
+['upBack','chBack','lkBack','ldBack','setBack'].forEach(id=>$('#'+id).onclick=goMenu);
 $('#trExit').onclick=()=>{goMenu()};
 $('#trAtk').onclick=function(){if(!G||!G.training)return;G.trAtk=!G.trAtk;this.classList.toggle('on',G.trAtk);this.textContent='МАНЕКЕН БЬЁТ: '+(G.trAtk?'ДА':'НЕТ')};
 $('#trDef').onclick=function(){if(!G||!G.training)return;G.trDef=!G.trDef;this.classList.toggle('on',G.trDef);this.textContent='МАНЕКЕН ЗАЩИЩАЕТСЯ: '+(G.trDef?'ДА':'НЕТ')};
-$('#sPix').onclick=()=>{save.pix=save.pix===4?3:save.pix===3?2:4;persist();resize();refreshMenu()};
-$('#sSwap').onclick=()=>{save.swap=!save.swap;persist();refreshMenu()};
-const fsBtn=$('#sFull');
-const fsOK=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
-if(window.navigator.standalone||matchMedia('(display-mode: standalone)').matches)fsBtn.textContent='УЖЕ В ПРИЛОЖЕНИИ';
-let fsTimer=0;
-fsBtn.onclick=()=>{
- if(!fsOK){
-  fsBtn.textContent='ПОДЕЛИТЬСЯ → НА ЭКРАН «ДОМОЙ»';
-  clearTimeout(fsTimer);fsTimer=setTimeout(()=>{fsBtn.textContent='ПОЛНЫЙ ЭКРАН'},5000);
-  return;
- }
- try{
-  const fs=document.fullscreenElement||document.webkitFullscreenElement;
-  if(fs)(document.exitFullscreen||document.webkitExitFullscreen).call(document);
-  else(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen).call(document.documentElement);
- }catch(e){fsBtn.textContent='НЕ РАБОТАЕТ'}
-};
-let resetArm=0;
-$('#sReset').onclick=function(){
- if(!resetArm){resetArm=setTimeout(()=>{resetArm=0;this.textContent='СБРОС'},3000);this.textContent='ТОЧНО? ЕЩЁ РАЗ';return}
- clearTimeout(resetArm);resetArm=0;this.textContent='СБРОС';
- save.money=150;save.up={};save.free={};save.cheats={};save.wins=0;save.losses=0;save.next=null;save.loadout=[];save.lmanual=false;save.tour=null;save.belts=[];save.pro=null;save.style='orth';save.styles=[];save.pity=0;save.rolls=0;persist();goMenu();
-};
+
 
 
 /* ========== tournaments ========== */
@@ -2757,7 +2872,7 @@ LK.splice(0,0,{n:'ПОЯС',f:b=>{
 LK.splice(0,0,{n:'СТРАНА',f:b=>{lkLbl(b,'ФЛАГ ВОЗЛЕ ТВОЕГО ИМЕНИ');const g=document.createElement('div');g.className='swg';
  CKEYS.forEach(k=>{const o=document.createElement('button');o.className='opt'+((save.cc||'RU')===k?' on':'');o.innerHTML=flagHTML(k)+COUNTRIES[k].n.toUpperCase();o.onclick=()=>{save.cc=k;persist();renderLook()};g.appendChild(o)});b.appendChild(g)}});
 LK.splice(0,0,{n:'ТЕЛО',f:b=>{lkLbl(b,'РОСТ');lkNum(b,'hgt',['НИЗКИЙ','СРЕДНИЙ','ВЫСОКИЙ','ОЧЕНЬ ВЫСОКИЙ']);lkLbl(b,'КОМПЛЕКЦИЯ');lkNum(b,'build',['ХУДОЙ','ОБЫЧНЫЙ','ПЛОТНЫЙ','ТОЛСТЫЙ']);lkLbl(b,'МУСКУЛЫ (ВЕЗДЕ)');lkNum(b,'muscle',MUSC);lkLbl(b,'ТОЛЬКО ТОРС');lkNumN(b,'mT');lkLbl(b,'ТОЛЬКО РУКИ');lkNumN(b,'mA');lkLbl(b,'ТОЛЬКО НОГИ');lkNumN(b,'mL')}});
-function openLook(){playerLook();show('look');renderLook()}
+function openLook(){playerLook();show('look');lookSide=lkSide();renderLook()}
 function renderLook(){
  const tabs=$('#lkTabs');tabs.innerHTML='';
  LK.forEach((t,i)=>{const b=document.createElement('button');b.className='tab'+(i===lkTab?' on':'');b.style.setProperty('--c','#ffc83d');b.textContent=t.n;b.onclick=()=>{lkTab=i;renderLook()};tabs.appendChild(b)});
@@ -2940,7 +3055,7 @@ function renderPro(){
  $('#prMoney').textContent=moneyTxt();
  lookT=prView==='bio'?'E':'P';lookUp=prView==='card'?(port?.38:-.5):prView==='bio'?(port?.22:-.45):0;
  if(prView==='bio')showBossModel(prBoss);
- lookSide=(!port&&(prView==='card'||prView==='bio'))?1.1:0;
+ lookSide=(!port&&(prView==='card'||prView==='bio'))?lkSide():0;
  applyVis();
  body.innerHTML='';
  const rk=rankOfP();
@@ -3005,7 +3120,7 @@ $('#prBack').onclick=()=>{
 let stView='cur',stPrev=null,stBusy=false,stRoll=null;
 const stOwned=id=>ownsStyle(id);
 function stColor(s){return RARS[s.r].c}
-function openSty(){stView='cur';stPrev=null;stBusy=false;stRoll=null;setupScene();P.sty=curStyle();show('sty');renderSty()}
+function openSty(){stView='cur';stPrev=null;stBusy=false;stRoll=null;setupScene();P.sty=curStyle();show('sty');lookSide=lkSide();renderSty()}
 function stCardHTML(s){
  const own=stOwned(s.id),hide=s.r===5&&!own;
  if(hide)return '<div class="stCard" style="--rc:'+stColor(s)+'"><span class="bd">'+RARS[s.r].n+'</span><h3>???</h3><p>Секретный стиль. Говорят, он выпадает раз на пятьсот боёв. Никто не знает, что он умеет.</p></div>';
@@ -3065,4 +3180,126 @@ function renderRoll(B){
 }
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
+/* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
+const GAME_VER='v27';
+/* в альбомной модель сдвигается влево, панель справа занимает ~54% */
+function lkScale(){
+ if(camera.aspect<.8)return 1;
+ const f=(lookT==='E'?E:P).f;return Math.max(1,(f.hs||1)*1.12);
+}
+function lkSide(){
+ if(camera.aspect<.8)return 0;
+ return Math.tan(29*Math.PI/180)*3.7*lkScale()*camera.aspect*.46;
+}
+/* ----- вращение бойца пальцем в облике, про-рейтинге и стилях ----- */
+document.addEventListener('pointerdown',e=>{
+ if(!lookMode)return;
+ const t=e.target;
+ if(!t||!t.classList||!(t.classList.contains('screen')||t.classList.contains('grow')||t.classList.contains('rotz')||t.classList.contains('rotHint')))return;
+ lkPtr={id:e.pointerId,x:e.clientX,t:e.timeStamp};lookAuto=false;lookVel=0;
+ const sc=t.closest('.screen');if(sc)sc.classList.add('rotd');
+ try{t.setPointerCapture(e.pointerId)}catch(_){}
+});
+document.addEventListener('pointermove',e=>{
+ if(!lkPtr||e.pointerId!==lkPtr.id)return;
+ const dx=e.clientX-lkPtr.x,dt=Math.max(8,e.timeStamp-lkPtr.t)/1000;
+ lkPtr.x=e.clientX;lkPtr.t=e.timeStamp;
+ lookRot+=dx*.012;lookVel=clamp(dx*.012/dt,-14,14)*.6+lookVel*.4;
+});
+const lkEnd=e=>{if(lkPtr&&e.pointerId===lkPtr.id)lkPtr=null};
+document.addEventListener('pointerup',lkEnd);document.addEventListener('pointercancel',lkEnd);
+
+/* ----- применение настроек ----- */
+function applyOpts(){
+ const O=save.opt,h=$('#hud');
+ h.classList.toggle('lefty',!!O.lefty);
+ h.style.setProperty('--cs',[.85,1,1.15][O.bsz]);
+ h.style.setProperty('--ba',[.28,.46,.66][O.bal]);
+}
+const inApp=!!(window.navigator.standalone||matchMedia('(display-mode: standalone)').matches);
+const SET_ROWS=[
+ ['ЗВУК','sound',[[0,'ВЫКЛ'],[1,'ВКЛ']]],
+ ['ГРОМКОСТЬ','vol',[[0,'ТИХО'],[1,'СРЕДНЕ'],[2,'ГРОМКО']]],
+ ['ТРЯСКА КАМЕРЫ','shake',[[0,'НЕТ'],[1,'МАЛО'],[2,'ОБЫЧНО']]],
+ ['ЭФФЕКТЫ СПЕЦУДАРОВ','fx',[[0,'ВЫКЛ'],[1,'ВКЛ']]],
+ ['РАЗМЕР КНОПОК','bsz',[[0,'МАЛЫЕ'],[1,'СРЕДНИЕ'],[2,'БОЛЬШИЕ']]],
+ ['ПРОЗРАЧНОСТЬ КНОПОК','bal',[[0,'ВЫСОКАЯ'],[1,'СРЕДНЯЯ'],[2,'НИЗКАЯ']]],
+ ['РАСКЛАДКА БОЯ','lefty',[[0,'ПРАВША'],[1,'ЛЕВША']]],
+ ['ПОДСКАЗКИ В БОЮ','hints',[[0,'ВЫКЛ'],[1,'ВКЛ']]],
+ ['РАЗМЕР ПИКСЕЛЕЙ','pix',[[4,'КРУПНЫЕ'],[3,'СРЕДНИЕ'],[2,'МЕЛКИЕ']],1],
+ ['АППЕРКОТ СВАЙПОМ','swap',[[0,'ВНИЗ'],[1,'ВВЕРХ']],1]
+];
+let setMsg='',resetArm2=0;
+function setVal(r){return r[3]?(r[1]==='swap'?(save.swap?1:0):save[r[1]]):save.opt[r[1]]}
+function setSet(r,v){
+ if(r[3]){if(r[1]==='swap')save.swap=!!v;else save[r[1]]=v}else save.opt[r[1]]=v;
+ persist();applyOpts();if(r[1]==='pix')resize();
+}
+function backupCode(){return 'PBX1:'+btoa(unescape(encodeURIComponent(JSON.stringify(save))))}
+function restoreCode(txt){
+ txt=(txt||'').trim();
+ if(!txt.startsWith('PBX1:'))throw new Error('Это не код прогресса');
+ const d=JSON.parse(decodeURIComponent(escape(atob(txt.slice(5)))));
+ if(!d||typeof d!=='object'||typeof d.money!=='number'||!d.seed)throw new Error('Код повреждён');
+ return d;
+}
+function resetProgress(){
+ save.money=150;save.up={};save.free={};save.cheats={};save.wins=0;save.losses=0;save.next=null;save.loadout=[];save.lmanual=false;save.tour=null;save.belts=[];save.pro=null;save.style='orth';save.styles=[];save.pity=0;save.rolls=0;persist();goMenu();
+}
+function renderSet(){
+ $('#setVer').textContent=GAME_VER;
+ const B=$('#setBody');B.innerHTML='';
+ const sh=t=>{const d=document.createElement('div');d.className='sh';d.textContent=t;B.appendChild(d)};
+ sh('ИГРА И УПРАВЛЕНИЕ');
+ SET_ROWS.forEach(r=>{
+  const row=document.createElement('div');row.className='srow';
+  row.innerHTML='<b>'+r[0]+'</b>';
+  const seg=document.createElement('div');seg.className='seg';
+  r[2].forEach(([v,n])=>{
+   const b=document.createElement('button');b.textContent=n;b.className=(setVal(r)===v)?'on':'';
+   b.onclick=()=>{sfx('ping');setSet(r,v);renderSet()};seg.appendChild(b);
+  });
+  row.appendChild(seg);B.appendChild(row);
+ });
+ sh('ДОПОЛНИТЕЛЬНО');
+ const act=document.createElement('div');act.className='sbtns';
+ const mk=(t,f,cls)=>{const b=document.createElement('button');b.className='btn '+(cls||'alt');b.textContent=t;b.onclick=f;act.appendChild(b);return b};
+ mk('ЧИТ-КОДЫ',()=>{sfx('ping');openCheat()});
+ if(!inApp)mk('ПОЛНЫЙ ЭКРАН',function(){
+  const ok=!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+  if(!ok){this.textContent='SAFARI: ПОДЕЛИТЬСЯ → НА ЭКРАН «ДОМОЙ»';return}
+  try{const fs=document.fullscreenElement||document.webkitFullscreenElement;
+   if(fs)(document.exitFullscreen||document.webkitExitFullscreen).call(document);
+   else(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen).call(document.documentElement)}catch(e){this.textContent='НЕ РАБОТАЕТ'}
+ });
+ else{const d=document.createElement('div');d.className='tiny';d.style.cssText='flex:1;align-self:center;margin:0';d.textContent='ИГРА ЗАПУЩЕНА КАК ПРИЛОЖЕНИЕ НА ВЕСЬ ЭКРАН';act.appendChild(d)}
+ const rb=mk('СБРОС ПРОГРЕССА',function(){
+  if(!resetArm2){resetArm2=setTimeout(()=>{resetArm2=0;this.textContent='СБРОС ПРОГРЕССА'},3000);this.textContent='ТОЧНО? НАЖМИ ЕЩЁ РАЗ';return}
+  clearTimeout(resetArm2);resetArm2=0;resetProgress();
+ });
+ B.appendChild(act);
+ sh('РЕЗЕРВНАЯ КОПИЯ ПРОГРЕССА');
+ const t=document.createElement('p');t.className='tiny';t.style.gridColumn='1/-1';
+ t.textContent='Нажми «Сохранить код» и спрячь текст в заметки. Если прогресс пропадёт, вставь код в поле и нажми «Загрузить».';B.appendChild(t);
+ const ta=document.createElement('textarea');ta.className='bk';ta.id='bkText';ta.placeholder='Здесь появится код прогресса, или вставь свой';ta.spellcheck=false;B.appendChild(ta);
+ const a2=document.createElement('div');a2.className='sbtns';
+ const m2=(tx,f)=>{const b=document.createElement('button');b.className='btn alt';b.textContent=tx;b.onclick=f;a2.appendChild(b)};
+ const msg=document.createElement('div');msg.className='msg';msg.style.gridColumn='1/-1';msg.textContent=setMsg;
+ m2('СОХРАНИТЬ КОД',async()=>{
+  const c=backupCode();ta.value=c;ta.focus();ta.select();
+  let ok=false;try{await navigator.clipboard.writeText(c);ok=true}catch(e){}
+  setMsg=ok?'КОД СКОПИРОВАН. ВСТАВЬ ЕГО В ЗАМЕТКИ':'КОД В ПОЛЕ. СКОПИРУЙ ЕГО ВРУЧНУЮ';msg.textContent=setMsg;
+ });
+ m2('ЗАГРУЗИТЬ КОД',()=>{
+  try{
+   const d=restoreCode(ta.value);
+   Object.assign(save,d);persist();setMsg='ПРОГРЕСС ЗАГРУЖЕН';msg.textContent=setMsg;
+   setTimeout(()=>location.reload(),500);
+  }catch(e){setMsg='ОШИБКА: '+e.message.toUpperCase();msg.textContent=setMsg}
+ });
+ B.appendChild(a2);B.appendChild(msg);
+}
+function openSet(){setMsg='';tourMode=false;show('set');renderSet()}
+$('#mSet').onclick=()=>{sfx('ping');openSet()};
+applyOpts();
 </script>
