@@ -2935,19 +2935,26 @@ function fpBuild(){
  const L=P.f.look,key=[L.glove,L.skin,L.trim].join();
  if(fpv.userData.key===key)return;
  while(fpv.children.length)fpv.remove(fpv.children[0]);fpv.userData.key=key;
- const lm=(c,o)=>new THREE.MeshPhongMaterial(Object.assign({color:c,shininess:25,specular:0x444444},o||{}));
- const mG=lm(L.glove),mGd=lm(shade(L.glove,.7)),mGl=lm(shade(L.glove,1.25)),mW=lm(0xeef0f6),mS=lm(shade(L.skin,.95),{shininess:6,specular:0x111111}),mT=lm(L.trim!=null?L.trim:0xffc83d);
+ const lm=(c,o)=>new THREE.MeshPhongMaterial(Object.assign({color:c,shininess:45,specular:0x666666},o||{}));
+ const mG=lm(L.glove),mGd=lm(shade(L.glove,.7)),mGl=lm(shade(L.glove,1.25)),mW=lm(0xeef0f6),mS=lm(shade(L.skin,.95),{shininess:6,specular:0x111111}),mT=lm(L.trim!=null?L.trim:0xffc83d,{shininess:70,specular:0xaaaaaa});
  FPM.arm={};FPM.g={};FPM.ghost={};FPM.sp={};
  for(const [k,sx] of[['L',-1],['R',1]]){
   const g=new THREE.Group(),add=(geo,m,x,y,z,sx2,sy,sz)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.scale.set(sx2||1,sy||1,sz||1);g.add(o);return o};
-  const sph=new THREE.SphereGeometry(1,14,10),cyl=new THREE.CylinderGeometry(1,1,1,14),
-  // knuckles point to +z, cuff to -z
-  main=add(sph,mG,0,0,.0,.125,.125,.14);
-  add(sph,mGl,0,.015,.1,.085,.07,.06);                       // knuckle roll
-  add(sph,mG,-sx*.12,.045,.0,.055,.05,.07);add(sph,mG,-sx*.115,.07,.055,.045,.04,.05);// thumb
-  const cuf=add(cyl,mW,0,0,-.17,.105,.05,.105);cuf.rotation.x=Math.PI/2;cuf.scale.set(.105,.05,.105);
-  const st=add(new THREE.BoxGeometry(1,1,1),mGl,0,.1,-.12,.06,.012,.2);
-  const patch=add(cyl,mW,0,.124,.03,.05,.012,.05);const dot=add(cyl,mT,0,.13,.03,.028,.012,.028);
+  const sph=new THREE.SphereGeometry(1,16,12),cyl=new THREE.CylinderGeometry(1,1,1,16),bxg=new THREE.BoxGeometry(1,1,1);
+  const main=add(sph,mG,0,0,0,.16,.15,.175);
+  add(sph,mGl,0,.06,-.04,.135,.09,.13);
+  // finger roll: stacked rounded bars at the front
+  [[.06,.125,mG],[-.005,.14,mGd],[-.07,.12,mG]].forEach(q=>{const bar=add(cyl,q[2],0,q[0],q[1],.052,.25,.052);bar.rotation.z=Math.PI/2;add(sph,q[2],-.125,q[0],q[1],.052,.052,.052);add(sph,q[2],.125,q[0],q[1],.052,.052,.052)});
+  // gold side swooshes + back stripe
+  [-1,1].forEach(q=>{const w=add(sph,mT,q*.151,-.005,-.03,.008,.085,.13);w.rotation.x=-.25*q;const w2=add(sph,mT,q*.146,.07,-.1,.007,.04,.07);w2.rotation.x=.4});
+  add(bxg,mT,0,.138,-.01,.04,.01,.17);add(bxg,mGd,0,.14,-.01,.012,.011,.18);
+  // thumb
+  add(sph,mG,-sx*.145,.02,-.05,.065,.06,.075);add(sph,mG,-sx*.158,.0,.04,.06,.055,.07);add(sph,mGl,-sx*.14,-.035,.115,.048,.045,.05);
+  add(bxg,mGd,-sx*.2,.0,.0,.006,.05,.2);
+  // cuff
+  const cuf=add(cyl,mGd,0,0,-.19,.105,.12,.105);cuf.rotation.x=Math.PI/2;
+  [-.135,-.245].forEach(z=>{const r=add(cyl,mT,0,0,z,.112,.022,.112);r.rotation.x=Math.PI/2});
+  add(bxg,mGl,0,.108,-.19,.15,.024,.1);add(bxg,mW,0,.122,-.19,.06,.006,.05);
   g.userData.main=main;
   fpv.add(g);FPM.g[k]=g;
   const fa=new THREE.Mesh(cyl,mS);fa.userData.sx=sx;fpv.add(fa);FPM.arm[k]=fa;
@@ -2957,29 +2964,30 @@ function fpBuild(){
  }
  FPM.pos={L:new THREE.Vector3(-.26,-.2,-.6),R:new THREE.Vector3(.26,-.2,-.6)};FPM.sc={L:1,R:1};FPM.roll={L:0,R:0};FPM.hist={L:[],R:[]};
 }
-function fpGx(){return .26*clamp(camera.aspect/1.6,.5,1)}
+function fpGx(){return .34*clamp(camera.aspect/1.6,.5,1)}
 function fpTarget(h,out){
  const o=E.f.holder;_v3.set(E.fx,(h.kind==='upp'?1.28:1.5)*E.f.hs+(h.kind==='upp'?0:(E.f.hs-1)*.0),E.fz);
  camera.updateMatrixWorld();camera.worldToLocal(_v3);
  const d=_v3.length(),reach=reachOf(h),dist=Math.hypot(P.fx-E.fx,P.fz-E.fz),hit=dist<=reach;
  const ext=hit?Math.max(.55,d-.3):Math.min(1.2,Math.max(.55,d-.3));
  out.copy(_v3).multiplyScalar(ext/d);return out}
-const _fk=new THREE.Vector3(),_fw=new THREE.Vector3();
+const _fk=new THREE.Vector3(),_fw=new THREE.Vector3(),_fd=new THREE.Vector3(),_fo=new THREE.Vector3();
 function fpPoseOf(h,arm,sx,gx,out){
- const k=h.kind;
- if(k==='cross')out.W.set(sx*.42,-.42,-.3);
- else if(k==='hook')out.W.set(sx*(.82+.1*(1-gx/.26)),-.1,-.5);
- else if(k==='upp')out.W.set(sx*.22,-.66,-.4);
- else if(k==='over')out.W.set(sx*.58,.34,-.34);
- else out.W.set(sx*.32,-.34,-.38);
+ const k=h.kind,wf=gx/.34;
  fpTarget(h,out.K);
- out.roll=k==='hook'?-sx*1.2:(k==='upp'?sx*.3:0);
- out.arc=k==='hook'?.34:(k==='over'?.18:(k==='upp'?.12:0));
+ const K=out.K,W=out.W,C=out.C;
+ if(k==='cross'){W.set(sx*.5*wf+sx*.1,-.5,-.26);K.x+=-sx*.05;C.set((W.x+K.x)/2,(W.y+K.y)/2-.04,(W.z+K.z)/2)}
+ else if(k==='hook'){W.set(sx*(.95*wf+.1),-.12,-.42);K.x+=sx*.2;K.y+=.02;C.set(W.x*.9,K.y,K.z*.82)}
+ else if(k==='upp'){W.set(sx*.3*wf+sx*.04,-.74,-.34);K.y-=.04;K.x+=sx*.04;C.set(W.x*.5+K.x*.5,W.y*.3+K.y*.7-.18,W.z*.5+K.z*.5)}
+ else if(k==='over'){W.set(sx*.66*wf+sx*.1,.42,-.3);K.y+=.08;C.set(W.x*.8,K.y+.34,K.z*.62)}
+ else{W.set(sx*.34*wf,-.3,-.4);C.set((W.x+K.x)/2,(W.y+K.y)/2,(W.z+K.z)/2)}
+ out.roll=k==='hook'?-sx*1.3:(k==='upp'?sx*.5:(k==='over'?sx*.5:0));
+ out.ext=k==='hook'?.17:k==='upp'?.16:k==='over'?.19:k==='cross'?.1:.08;
  return out}
-const _pp={W:new THREE.Vector3(),K:new THREE.Vector3(),roll:0,arc:0};
+const _pp={W:new THREE.Vector3(),K:new THREE.Vector3(),C:new THREE.Vector3(),roll:0,ext:.1};
 function fpArmState(arm,sx,gx,t,res){
  // base (no attack) pose
- const gp=new THREE.Vector3(sx*gx,-.2,-.6),r=res;
+ const gp=new THREE.Vector3(sx*gx,-.2,-.62),r=res;
  let sc=1.0,roll=0;
  const sway=Math.sin(timeNow*2.1+(sx>0?1.6:0));
  gp.y+=sway*.012;gp.x+=Math.sin(timeNow*1.3+sx)*.008;gp.z+=sway*.01;
@@ -2997,12 +3005,12 @@ function fpArmState(arm,sx,gx,t,res){
   let prevP=gp.clone(),prevRoll=roll;
   for(let i=0;i<hs.length;i++){
    const h=hs[i];fpPoseOf(h,arm,sx,gx,_pp);
-   const ws=h.at-h.w,ext=Math.min(.12,h.w*.6),ss=h.at-ext,end=h.at+h.s+.05;
+   const ws=h.at-h.w,ext=Math.min(_pp.ext,h.w*.6),ss=h.at-ext,end=h.at+h.s+.05;
    if(t<ws){r.pos.copy(prevP);r.roll=prevRoll;return}
    if(t<ss){const u=eo(clamp((t-ws)/Math.max(.001,ss-ws),0,1));r.pos.lerpVectors(prevP,_pp.W,u);r.roll=prevRoll+(0-prevRoll)*u;r.sc=1.0+.1*u;return}
-   if(t<end){const u0=clamp((t-ss)/Math.max(.001,ext),0,1),u=u0>=1?1:eob(u0);r.pos.lerpVectors(_pp.W,_pp.K,u);
-    const bu=Math.sin(Math.PI*clamp(u0,0,1));r.pos.z-=_pp.arc*bu;if(h.kind==='hook')r.pos.x+=(-sx)*.0;if(h.kind==='upp')r.pos.y+=.1*bu;
-    r.roll=_pp.roll*u;r.sc=1.05+.12*u;return}
+   if(t<end){const u0=clamp((t-ss)/Math.max(.001,ext),0,1),u=u0>=1?1:(h.kind==='jab'||h.kind==='cross'?eob(u0):eo(u0)*1.0);
+    const v=1-u;r.pos.set(v*v*_pp.W.x+2*v*u*_pp.C.x+u*u*_pp.K.x,v*v*_pp.W.y+2*v*u*_pp.C.y+u*u*_pp.K.y,v*v*_pp.W.z+2*v*u*_pp.C.z+u*u*_pp.K.z);
+    r.roll=_pp.roll*Math.min(1,u*1.6);r.sc=1.05+.12*u;return}
    prevP=_pp.K.clone();prevRoll=_pp.roll;
    const nx=hs[i+1];
    if(nx&&t<nx.at-nx.w){r.pos.copy(prevP);r.roll=prevRoll;r.sc=1.17;return}
@@ -3021,12 +3029,12 @@ function fpViewUpdate(dt,on){
   cp.lerp(tg,P.state==='atk'?1-Math.exp(-dt*80):k);FPM.sc[arm]+=(_st[arm].sc-FPM.sc[arm])*k;FPM.roll[arm]+=(_st[arm].roll-FPM.roll[arm])*k;
   const g=FPM.g[arm],anc=_v1.set(sx*(.55*clamp(camera.aspect/1.6,.5,1)+.1),-.95,-.12);
   _v2.copy(cp).sub(anc);const len=_v2.length();_v2.divideScalar(len);
-  g.position.copy(cp);_q1.setFromUnitVectors(_vz,_v2);_q2.setFromAxisAngle(_vz,FPM.roll[arm]);g.quaternion.copy(_q1).multiply(_q2);g.scale.setScalar(FPM.sc[arm]*(camera.aspect<.8?.78:1));
+  _fd.copy(_v2).multiplyScalar(.12).add(_fo.set(-sx*.1,.62,-1).multiplyScalar(.88)).normalize();g.position.copy(cp);_q1.setFromUnitVectors(_vz,_fd);_q2.setFromAxisAngle(_vz,FPM.roll[arm]);g.quaternion.copy(_q1).multiply(_q2);g.scale.setScalar(FPM.sc[arm]*.8*(camera.aspect<.8?.78:1));
   const fa=FPM.arm[arm],r=.07*FPM.sc[arm]*(camera.aspect<.8?.8:1);
-  const cuffBack=.19*FPM.sc[arm];
-  _v3.copy(cp).addScaledVector(_v2,-cuffBack);_fk.copy(_v3).add(anc).multiplyScalar(.5);
+  const cuffBack=.245*FPM.sc[arm]*.8;
+  _v3.copy(cp).addScaledVector(_fd,-cuffBack);_fk.copy(_v3).add(anc).multiplyScalar(.5);
   const fl=_v3.distanceTo(anc);fa.position.copy(_fk);fa.scale.set(r,fl,r);fa.quaternion.setFromUnitVectors(_vy,_fw.copy(_v3).sub(anc).normalize());
-  const sl=FPM.sp[arm];sl.position.copy(_v3).addScaledVector(_v2,-.04);sl.scale.set(r*1.12,.07,r*1.12);sl.quaternion.copy(fa.quaternion);
+  const sl=FPM.sp[arm];sl.position.copy(_v3).addScaledVector(_fd,-.03);sl.scale.set(r*1.05,.05,r*1.05);sl.quaternion.copy(fa.quaternion);
   // ghosts
   const h=FPM.hist[arm];h.unshift(cp.clone());if(h.length>6)h.length=6;
   const spd=h.length>1?h[0].distanceTo(h[1])/Math.max(dt,.001):0,gs=FPM.ghost[arm];
@@ -3705,7 +3713,7 @@ function renderRoll(B){
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
 /* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
-const GAME_VER='v35';
+const GAME_VER='v36';
 /* в альбомной модель сдвигается влево, панель справа занимает ~54% */
 function lkScale(){
  if(camera.aspect<.8)return 1;
