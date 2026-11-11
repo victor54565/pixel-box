@@ -2072,11 +2072,20 @@ function buildFighter(L,dir){
  // ----- accessories -----
  const AC=L.accC!=null?L.accC:0xe53935,am=pm(AC),am2=pm(shade(AC,.7));
  const A=L.acc||'none';
- if(A==='cap'){CAP(head,.215,am,.27,-.3,1,1.04,1.07);const v=bx(head,.27,.025,.15,am2,0,.285,.215);v.rotation.x=.25;bx(head,.05,.05,.05,am2,0,.455,0)}
- else if(A==='beanie'){CAP(head,.225,am,.25,-.15,1,1.18,1.07);CY(head,.222,.222,.055,am2,0,.285,-.005,1,1.04,12);SP(head,.045,am2,0,.5,0,1,1,1,6)}
- else if(A==='crown'){CY(head,.175,.19,.07,gold,0,.43,0,1,1,10);for(let i=0;i<6;i++){const a=i/6*Math.PI*2,c=new THREE.Mesh(gCone(.04,.12),gold);c.position.set(Math.sin(a)*.18,.5,Math.cos(a)*.18);head.add(c);SP(head,.016,pm(0xe53935),Math.sin(a)*.185,.45,Math.cos(a)*.185,1,1,1,5)}}
+ if(A==='cap'){CAP(head,.215,am,.27,-.3,1,1.04,1.07);const v=bx(head,.27,.025,.15,am2,0,.285,.215);v.rotation.x=.25;bx(head,.05,.05,.05,am2,0,.455,0);bx(head,.1,.012,.1,pm(0xffffff),0,.455,.02);CY(head,.1,.1,.02,pm(0xffffff),0,.4,.205,1,.4,10).rotation.x=Math.PI/2.6;for(let i=-2;i<=2;i++){const sd=bx(head,.012,.012,.2,am2,i*.07,.38,.04);sd.rotation.z=i*-.18}}
+ else if(A==='beanie'){CAP(head,.225,am,.25,-.15,1,1.18,1.07);CY(head,.222,.222,.055,am2,0,.285,-.005,1,1.04,12);SP(head,.06,am2,0,.52,0,1,1,1,8);for(let i=0;i<12;i++){const a2=i/12*6.283;bx(head,.014,.05,.012,am,Math.sin(a2)*.228,.285,Math.cos(a2)*.228)}}
+ else if(A==='crown'){
+  const rb=pm(0xe53935,{shininess:80,specular:0xffffff,emissive:0x330000}),bl=pm(0x2e7bff,{shininess:80,specular:0xffffff,emissive:0x0a2a66}),gd2=pm(0xffe27a,{shininess:90,specular:0xffffff}),gd3=pm(0xc99a1a);
+  CY(head,.17,.17,.05,pm(0x8a1020),0,.5,0,1,1,12);SP(head,.17,pm(0x8a1020),0,.52,0,1,.6,1,10);
+  CY(head,.182,.2,.075,gold,0,.435,0,1,1,14);CY(head,.19,.19,.014,gd2,0,.47,0,1,1,14);CY(head,.19,.19,.014,gd3,0,.4,0,1,1,14);
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2,sx=Math.sin(a),cz=Math.cos(a),big=i%2===0;
+   const c=new THREE.Mesh(gCone(big?.05:.036,big?.17:.11),gold);c.position.set(sx*.185,big?.56:.53,cz*.185);head.add(c);
+   SP(head,big?.02:.014,pm(0xffffff,{shininess:100,specular:0xffffff,emissive:0x555555}),sx*.185,big?.655:.595,cz*.185,1,1,1,6);
+   SP(head,.019,i%4===0?rb:bl,sx*.196,.437,cz*.196,1,1.1,.8,6)}
+  for(let i=0;i<8;i++){const a=(i+.5)/8*Math.PI*2;SP(head,.011,gd2,Math.sin(a)*.198,.402,Math.cos(a)*.198,1,1,1,5)}
+  const cf=bx(head,.03,.1,.03,gold,0,.5,.19);bx(head,.075,.03,.03,gold,0,.525,.19);SP(head,.02,rb,0,.5,.208,1,1,1,6)}
  else if(A==='phones'){for(let i=-6;i<=6;i++){const a=i/6*1.45,b2=bx(head,.034,.034,.04,am2,Math.sin(a)*.205,.22+Math.cos(a)*.205,0);b2.rotation.z=-a}[1,-1].forEach(s=>{CY(head,.075,.075,.06,am,s*.215,.2,0,1,1,10).rotation.z=Math.PI/2;CY(head,.05,.05,.07,am2,s*.235,.2,0,1,1,8).rotation.z=Math.PI/2})}
- else if(A==='horns'){const bone=pm(0xe8dcc0);[1,-1].forEach(s=>{const h2=new THREE.Mesh(gCone(.05,.24),bone);h2.position.set(s*.15,.43,.02);h2.rotation.z=-s*.55;head.add(h2);SP(head,.06,bone,s*.13,.36,.02,1,.7,1,6)})}
+ else if(A==='horns'){const bone=pm(0xe8dcc0);[1,-1].forEach(s=>{const h2=new THREE.Mesh(gCone(.05,.24),bone);h2.position.set(s*.15,.43,.02);h2.rotation.z=-s*.55;head.add(h2);SP(head,.06,bone,s*.13,.36,.02,1,.7,1,6);for(let k=0;k<4;k++){const r2=CY(head,.05-k*.009,.05-k*.009,.012,pm(0xb8a880),s*(.15+k*.0),.43,.02,1,1,6);r2.position.y=.43+k*.04-k*.0;r2.position.x=s*(.15-k*.028);r2.rotation.z=-s*.55}})}
  const G2=L.glasses||'none';
  if(G2!=='none'){
   const fr=pm(G2==='round'?0xffc83d:0x15151a),ln=G2==='shades'?pm(0x101018):G2==='round'?pm(0xffe9a0,{transparent:true,opacity:.75}):pm(0xff3df0,{emissive:0xaa1a99});
@@ -2098,9 +2107,15 @@ function buildFighter(L,dir){
   SP(el,.055*mf,skin,0,0,0,1,1,1,10);
   el.add(tube({y0:0,y1:-.28,nv:18,nt:24,sg:s,prof:y=>{const r=cr(fP,-y/.28)*mf;return[r,r]},d:fD,l:(y,ph)=>{const v=-y/.28;return clamp(1-.14*GA(AD(ph,2.0),0,.1)*GA(v,.4,.3)-.12*GA(AD(ph,.2),0,.1)*GA(v,.4,.3),.65,1)},col:skinC,mat:skinV,c:y=>y<-.21?WH:null}));
   CY(el,.098,.108,.09,gloveD,0,-.31,.01,1,1,12);
+  CY(el,.112,.112,.034,white,0,-.275,.01,1,1,12);CY(el,.1,.1,.012,gloveL,0,-.355,.01,1,1,12);
+  bx(el,.05,.026,.215,gloveL,0,-.31,.012);bx(el,.03,.014,.222,white,0,-.31,.012);
   if(L.wrist)CY(el,.056*mf,.056*mf,.06,am,0,-.235,0,1,1,10);
   const gl=SP(el,.128,glove,0,-.39,.02,1,1.08,1.06,12);
-  SP(el,.058,glove,s*-.125,-.36,.1,1,1,1,8);SP(el,.055,gloveL,0,-.43,.14,1.3,.9,.9,8);bx(el,.11,.09,.012,white,0,-.35,.17);
+  CY(el,.133,.133,.01,gloveD,0,-.43,.02,1,1.06,16);
+  SP(el,.085,gloveL,0,-.435,.105,1.15,.8,.75,10);
+  [-1,1].forEach(q=>SP(el,.012,gloveD,q*.05,-.47,.19,1,1,1,5));
+  SP(el,.058,glove,s*-.125,-.35,.085,1,1.1,1,8);SP(el,.044,glove,s*-.135,-.405,.14,1,1,1.1,8);bx(el,.012,.07,.012,gloveD,s*-.172,-.38,.1);
+  CY(el,.05,.05,.014,white,0,-.36,.17,1,1,16).rotation.x=Math.PI/2;CY(el,.028,.028,.018,am,0,-.36,.172,1,1,12).rotation.x=Math.PI/2;
   arms[key]={sh,el,glove:gl};
  }
  const stars=new THREE.Group();stars.visible=false;stars.position.set(0,.55,0);head.add(stars);
@@ -2734,9 +2749,9 @@ function atkPose(c,g){
  while(i<H.length&&t>=H[i].at+H[i].s)i++;
  if(i>=H.length){
   const h=H[H.length-1],e=h.at+h.s,u=clamp((t-e)/Math.max(.05,a.total-e),0,1);
-  const K0=windStrike(g,h,c.sty).K;K0.lunge+=reachLx(c,h);return lerpP(K0,g,eio(u));
+  const K0=windStrike(g,h,c.sty).K;if(c.f&&c.f._fp){const q=h.arm==='L'?'r':'l';for(const x of['x','y','z','e'])K0[q+x]=g[q+x]}K0.lunge+=reachLx(c,h);return lerpP(K0,g,eio(u));
  }
- const h=H[i],ws=windStrike(g,h,c.sty),from=i>0?windStrike(g,H[i-1],c.sty).K:g;if(i>0)from.lunge+=reachLx(c,H[i-1]);
+ const h=H[i],ws=windStrike(g,h,c.sty),from=i>0?windStrike(g,H[i-1],c.sty).K:g;if(c.f&&c.f._fp){const q=h.arm==='L'?'r':'l';for(const o of[ws.W,ws.K,from])if(o!==g)for(const x of['x','y','z','e'])o[q+x]=g[q+x]}if(i>0)from.lunge+=reachLx(c,H[i-1]);
  const ext=Math.min(.12,h.w*.6),lx=reachLx(c,h);if(lx){ws.K.lunge+=lx}
  if(t<h.at-ext){const u=clamp((t-(h.at-h.w))/Math.max(.001,h.w-ext),0,1);return lerpP(from,ws.W,eo(u))}
  const u=clamp((t-(h.at-ext))/Math.max(.001,ext),0,1);
@@ -2820,14 +2835,14 @@ function emitTrails(c,dt){
 }
 function animEnt(c,dt){
  const f=c.f,cur=f.cur;if(c.castT>0)c.castT-=dt;const p=poseFor(c);
- const k=1-Math.exp(-dt*(c.state==='atk'?(c.isP&&G&&G.fps?42:60):(c.state==='hit'?34:(c.state==='dodge'?26:14))));
+ const k=1-Math.exp(-dt*(c.state==='atk'?(c.isP&&G&&G.fps?30:60):(c.state==='hit'?34:(c.state==='dodge'?26:14))));
  const M=(key,v)=>{cur[key]+=(v-cur[key])*k;return cur[key]};
  f.arms.L.sh.rotation.set(M('lx',p.lx),M('ly',p.ly),M('lz',p.lz));
  f.arms.L.el.rotation.x=M('le',p.le);
  f.arms.R.sh.rotation.set(M('rx',p.rx),M('ry',p.ry),M('rz',p.rz));
  f.arms.R.el.rotation.x=M('re',p.re);
- const ty=M('ty',p.ty),tz=M('tz',p.tz);
- const txv=M('tx',p.tx);f.torso.rotation.set(txv*.85,ty,tz);f.pelvis.rotation.x=txv*.35;
+ const fd=f._fp?.3:1;const ty=M('ty',p.ty)*fd,tz=M('tz',p.tz)*fd;
+ const txv=M('tx',p.tx)*(f._fp?.4:1);f.torso.rotation.set(txv*.85,ty,tz);f.pelvis.rotation.x=txv*.35;
  f.head.rotation.set(M('hx',p.hx),M('hy',p.hy),M('hz',p.hz));
  f.pelvis.rotation.y=ty*.4;f.pelvis.rotation.z=-tz*.3;
  const dyBody=M('dy',p.dy);
@@ -2912,7 +2927,7 @@ function animEnt(c,dt){
 }
 
 /* ========== camera: over the shoulder, waist up ========== */
-function fpBody(f,hide){f.model.children.forEach(c=>{if(c!==f.torso)c.visible=!hide});f.torso.children.forEach(c=>{if(c!==f.arms.L.sh&&c!==f.arms.R.sh)c.visible=!hide})}
+function fpBody(f,hide){['L','R'].forEach(k=>{const a=f.arms[k];a.sh.children.forEach(c=>{if(c!==a.el)c.visible=!hide})});f.model.children.forEach(c=>{if(c!==f.torso)c.visible=!hide});f.torso.children.forEach(c=>{if(c!==f.arms.L.sh&&c!==f.arms.R.sh)c.visible=!hide})}
 const _fe=new THREE.Vector3(),camPos=new THREE.Vector3(0,2.4,5.5),camLook=new THREE.Vector3(0,1,0),tPos=new THREE.Vector3(),tLook=new THREE.Vector3();
 function updCamera(raw){
  const port=camera.aspect<.8;
@@ -2938,16 +2953,16 @@ function updCamera(raw){
   const sh=port?1.05:.85;tLook.set(E.fx-rx*sh,(port?1.5:1.45)+(E.f.hs-1)*.7,E.fz-rz*sh);
  }
  const fp=!!(G&&G.fps&&!lookMode&&G.mode!=='end'&&P.fx!==undefined);
- if(P&&P.f&&!!P.f._fp!==fp){P.f._fp=fp;fpBody(P.f,fp);['L','R'].forEach(s=>{const g=P.f.arms[s].glove;if(g)g.scale.setScalar(fp?.72:1)})}
+ if(P&&P.f&&!!P.f._fp!==fp){P.f._fp=fp;fpBody(P.f,fp);['L','R'].forEach(s=>{const g=P.f.arms[s].glove;if(g)g.scale.setScalar(fp?.8:1)})}
  let fpKo=0;
  if(fp){
   P.f.holder.getWorldPosition(_hp);E.f.holder.getWorldPosition(_fe);
   let ex=_fe.x-_hp.x,ez=_fe.z-_hp.z;const ed=Math.hypot(ex,ez)||1;ex/=ed;ez/=ed;
   const hs=P.f.hs,mv=P.mvs||0,bob=Math.sin(P.gp)*.03*mv,dip=P.state==='hit'?-.05*clamp(P.hitT/(P.hitDur||.3),0,1):0;
   if(G.mode==='ko'&&G.byKO&&!G.win)fpKo=eo(clamp(G.t/1.1,0,1));
-  tPos.set(_hp.x-ex*.14,(1.5*hs+.15+bob+dip)*(1-.78*fpKo),_hp.z-ez*.14);
-  tLook.set(_fe.x,(1.3+(E.f.hs-1)*.7)*(1-.5*fpKo),_fe.z);
-  const fv=port?100:84;if(camera.fov!==fv||camera.near!==.05){camera.fov=fv;camera.near=.05;camera.updateProjectionMatrix();camera._fp=1}
+  tPos.set(_hp.x+ex*.17,(1.46*hs+.12+bob+dip)*(1-.78*fpKo),_hp.z+ez*.17);
+  tLook.set(_fe.x,(1.52+(E.f.hs-1)*.7)*(1-.5*fpKo),_fe.z);
+  const fv=port?96:72;if(camera.fov!==fv||camera.near!==.06){camera.fov=fv;camera.near=.06;camera.updateProjectionMatrix();camera._fp=1}
  }else if(camera._fp){camera._fp=0;camera.near=.1;resize()}
  if(lookMode&&!port){if(camera.fov!==58){camera.fov=58;camera.updateProjectionMatrix();camera._lk=1}}else if(camera._lk){camera._lk=0;resize()}
  const k=1-Math.exp(-raw*(fp?20:lookMode?6:(G&&G.free?8:3.6)));
@@ -3580,7 +3595,7 @@ function renderRoll(B){
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
 /* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
-const GAME_VER='v33';
+const GAME_VER='v34';
 /* в альбомной модель сдвигается влево, панель справа занимает ~54% */
 function lkScale(){
  if(camera.aspect<.8)return 1;
