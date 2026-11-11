@@ -1828,6 +1828,28 @@ function tube(o){
  return new THREE.Mesh(g,o.mat);
 }
 const BUMP=(v,ph,cv,cp,sv,sp,amp)=>amp*GA(v,cv,sv)*GA(AD(ph,cp),0,sp);
+const _gGeos={};
+function gloveGeo(colG,colT){
+ const key=colG+'_'+colT;if(_gGeos[key])return _gGeos[key];
+ const gg=new THREE.SphereGeometry(1,36,26),pa=gg.attributes.position,cols=new Float32Array(pa.count*3),cb=new THREE.Color(colG),cd=new THREE.Color(shade(colG,.55)),cgd=new THREE.Color(colT);
+ for(let i=0;i<pa.count;i++){
+  const x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);
+  let X=x*.19,Y=y*.18,Z=z*.205;
+  const back=Math.max(0,-z-.2);X*=1-.25*back;Y*=1-.22*back;
+  const fl=Math.max(0,z-.2)*Math.max(0,-y+.35);Z+=fl*.05;Y-=fl*.03;
+  const cr=Math.exp(-Math.pow((y+.16)/.1,2))*Math.max(0,z-.12);
+  const k=1-.075*cr;X*=k;Y*=k;Z*=k;Y+=.012*Math.max(0,y)*(1-Math.abs(z));
+  pa.setXYZ(i,X,Y,Z);
+  let c=cb;const ax=Math.abs(x),dg=y+.55*(z-.05);
+  if(ax>.72&&dg>-.18&&dg<-.02&&z>-.35)c=cgd;
+  if(ax>.72&&dg>.1&&dg<.15&&z>-.2)c=cgd;
+  if(z<-.62&&z>-.78)c=cgd;
+  if(cr>.35)c=cd;
+  cols[i*3]=c.r;cols[i*3+1]=c.g;cols[i*3+2]=c.b;
+ }
+ gg.setAttribute('color',new THREE.BufferAttribute(cols,3));gg.computeVertexNormals();
+ return _gGeos[key]=gg;
+}
 function buildFighter(L,dir){
  const holder=new THREE.Group(),model=new THREE.Group();
  holder.add(model);model.rotation.y=dir<0?Math.PI:0;
@@ -2097,6 +2119,8 @@ function buildFighter(L,dir){
  const aP=[[0,.075],[.2,.078],[.5,.07],[.8,.058],[1,.052]],fP=[[0,.052],[.18,.058],[.6,.046],[1,.036]];
  const aD=(y,ph)=>{const v=-y/.3;return BUMP(v,ph,.42,0,.22,.55,.022*maA)+BUMP(v,ph,.7,.9,.14,.4,.01*maA)+BUMP(v,ph,.36,2.3,.22,.45,.026*maA)+BUMP(v,ph,.36,-2.3,.22,.45,.022*maA)+BUMP(v,ph,.1,1.9,.13,.9,.018*maA)-.01*GA(AD(ph,Math.PI),0,.14)*GA(v,.4,.3)-.008*GA(AD(ph,.55),0,.12)*GA(v,.4,.3)-.008*GA(AD(ph,-.55),0,.12)*GA(v,.45,.3)};
  const fD=(y,ph)=>{const v=-y/.28;return BUMP(v,ph,.14,1,.12,.45,.018*maA)+BUMP(v,ph,.3,-.6,.22,.45,.014*maA)+BUMP(v,ph,.3,2.8,.24,.45,.014*maA)-.006*GA(AD(ph,2.0),0,.1)*GA(v,.35,.3)};
+ const lumC=c=>((c>>16&255)*.3+(c>>8&255)*.59+(c&255)*.11)/255,trC=(L.trim!=null&&lumC(L.trim)<.72)?L.trim:shade(L.glove,1.7);
+ const gTrimM=pm(trC),gloveV=pm(0xffffff,{vertexColors:true,shininess:10,specular:0x141414});
  const arms={};
  for(const [key,s] of[['L',1],['R',-1]]){
   const sh=new THREE.Group();sh.position.set(s*(cr(tP,.5)*wb*ext*(1+.09*mTe*GA(.5,.4,.17))+.045+.005*Math.min(mA,7)),.5,0);sh.rotation.order='YXZ';torso.add(sh);
@@ -2106,16 +2130,13 @@ function buildFighter(L,dir){
   const el=new THREE.Group();el.position.set(0,-.3,0);sh.add(el);
   SP(el,.055*mf,skin,0,0,0,1,1,1,10);
   el.add(tube({y0:0,y1:-.28,nv:18,nt:24,sg:s,prof:y=>{const r=cr(fP,-y/.28)*mf;return[r,r]},d:fD,l:(y,ph)=>{const v=-y/.28;return clamp(1-.14*GA(AD(ph,2.0),0,.1)*GA(v,.4,.3)-.12*GA(AD(ph,.2),0,.1)*GA(v,.4,.3),.65,1)},col:skinC,mat:skinV,c:y=>y<-.21?WH:null}));
-  CY(el,.098,.108,.09,gloveD,0,-.31,.01,1,1,12);
-  CY(el,.112,.112,.034,white,0,-.275,.01,1,1,12);CY(el,.1,.1,.012,gloveL,0,-.355,.01,1,1,12);
-  bx(el,.05,.026,.215,gloveL,0,-.31,.012);bx(el,.03,.014,.222,white,0,-.31,.012);
   if(L.wrist)CY(el,.056*mf,.056*mf,.06,am,0,-.235,0,1,1,10);
-  const gl=SP(el,.128,glove,0,-.39,.02,1,1.08,1.06,12);
-  CY(el,.133,.133,.01,gloveD,0,-.43,.02,1,1.06,16);
-  SP(el,.085,gloveL,0,-.435,.105,1.15,.8,.75,10);
-  [-1,1].forEach(q=>SP(el,.012,gloveD,q*.05,-.47,.19,1,1,1,5));
-  SP(el,.058,glove,s*-.125,-.35,.085,1,1.1,1,8);SP(el,.044,glove,s*-.135,-.405,.14,1,1,1.1,8);bx(el,.012,.07,.012,gloveD,s*-.172,-.38,.1);
-  CY(el,.05,.05,.014,white,0,-.36,.17,1,1,16).rotation.x=Math.PI/2;CY(el,.028,.028,.018,am,0,-.36,.172,1,1,12).rotation.x=Math.PI/2;
+  const gl=new THREE.Group();gl.position.set(0,-.395,.012);gl.rotation.x=Math.PI/2;gl.scale.setScalar(.8);el.add(gl);
+  gl.add(new THREE.Mesh(gloveGeo(L.glove,trC),gloveV));
+  SP(gl,.06,glove,-s*.15,-.05,.06,1,.92,1.9,10);SP(gl,.05,glove,-s*.135,-.075,.15,1,.96,1.1,8);bx(gl,.006,.012,.12,gloveD,-s*.15,-.012,.1);
+  CY(gl,.1,.1,.13,gloveD,0,0,-.21,1,1,16).rotation.x=Math.PI/2;
+  [-.15,-.275].forEach(z=>{CY(gl,.105,.105,.02,gTrimM,0,0,z,1,1,16).rotation.x=Math.PI/2});
+  bx(gl,.13,.014,.1,gloveD,0,.1,-.21);bx(gl,.05,.006,.04,gTrimM,0,.108,-.21);
   arms[key]={sh,el,glove:gl};
  }
  const stars=new THREE.Group();stars.visible=false;stars.position.set(0,.55,0);head.add(stars);
@@ -2817,7 +2838,7 @@ function poseFor(c){
 }
 const _gp=new THREE.Vector3(),_gv=new THREE.Vector3();
 function emitTrails(c,dt){
- if(!c.gl)c.gl={};if(c.f._fp)return;
+ if(!c.gl)c.gl={};
  const atk=c.state==='atk'&&dt>0;
  for(const key of['L','R']){
   c.f.arms[key].glove.getWorldPosition(_gp);
@@ -2846,7 +2867,7 @@ function animEnt(c,dt){
  f.head.rotation.set(M('hx',p.hx),M('hy',p.hy),M('hz',p.hz));
  f.pelvis.rotation.y=ty*.4;f.pelvis.rotation.z=-tz*.3;
  const dyBody=M('dy',p.dy);
- const lunge=M('lunge',p.lunge)*(f._fp?0:1);
+ const lunge=M('lunge',p.lunge);
  const prevX=c.lastX,prevZ=c.lastZ;
  const bk=c.state==='dodge'&&c.dodge?(c.dodge.back?.55:(c.dodge.fwd?-.35:0)):0;
  c.bo=(c.bo||0)+(bk-(c.bo||0))*(1-Math.exp(-dt*12));
@@ -2935,14 +2956,15 @@ function fpBuild(){
  const L=P.f.look,key=[L.glove,L.skin,L.trim].join();
  if(fpv.userData.key===key)return;
  while(fpv.children.length)fpv.remove(fpv.children[0]);fpv.userData.key=key;
- const lm=(c,o)=>new THREE.MeshPhongMaterial(Object.assign({color:c,shininess:45,specular:0x666666},o||{}));
- const mG=lm(L.glove),mGd=lm(shade(L.glove,.7)),mGl=lm(shade(L.glove,1.25)),mW=lm(0xeef0f6),mS=lm(shade(L.skin,.95),{shininess:6,specular:0x111111}),mT=lm(L.trim!=null?L.trim:0xffc83d,{shininess:70,specular:0xaaaaaa});
+const lumC=c=>((c>>16&255)*.3+(c>>8&255)*.59+(c&255)*.11)/255,trC=(L.trim!=null&&lumC(L.trim)<.72)?L.trim:shade(L.glove,1.7);
+ const lm=(c,o)=>new THREE.MeshPhongMaterial(Object.assign({color:c,shininess:12,specular:0x161616},o||{}));
+ const mG=lm(L.glove),mGd=lm(shade(L.glove,.7)),mGl=lm(shade(L.glove,1.25)),mW=lm(0xeef0f6),mS=lm(shade(L.skin,.95),{shininess:6,specular:0x111111}),mT=lm(trC);
  FPM.arm={};FPM.off={};FPM.g={};FPM.ghost={};FPM.sp={};
  for(const [k,sx] of[['L',-1],['R',1]]){
   const g=new THREE.Group(),add=(geo,m,x,y,z,sx2,sy,sz)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.scale.set(sx2||1,sy||1,sz||1);g.add(o);return o};
   const sph=new THREE.SphereGeometry(1,16,12),cyl=new THREE.CylinderGeometry(1,1,1,18),bxg=new THREE.BoxGeometry(1,1,1);
   // glove body: one sculpted mesh with painted stripes
-  const gg=new THREE.SphereGeometry(1,36,26),pa=gg.attributes.position,cols=new Float32Array(pa.count*3),cb=new THREE.Color(L.glove),cd=new THREE.Color(shade(L.glove,.55)),cgd=new THREE.Color(L.trim!=null?L.trim:0xffc83d),tmp=new THREE.Color();
+  const gg=new THREE.SphereGeometry(1,36,26),pa=gg.attributes.position,cols=new Float32Array(pa.count*3),cb=new THREE.Color(L.glove),cd=new THREE.Color(shade(L.glove,.55)),cgd=new THREE.Color(trC),tmp=new THREE.Color();
   for(let i=0;i<pa.count;i++){
    let x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);
    // base proportions (z: wrist -> knuckles)
@@ -2966,7 +2988,7 @@ function fpBuild(){
    tmp.copy(c);cols[i*3]=tmp.r;cols[i*3+1]=tmp.g;cols[i*3+2]=tmp.b;
   }
   gg.setAttribute('color',new THREE.BufferAttribute(cols,3));gg.computeVertexNormals();
-  const mV=new THREE.MeshPhongMaterial({vertexColors:true,shininess:30,specular:0x3a3a3a});
+  const mV=new THREE.MeshPhongMaterial({vertexColors:true,shininess:10,specular:0x141414});
   const main=add(gg,mV,0,0,0,1,1,1);
   // thumb lying along the inner side
   const th=add(sph,mV,0,0,0,1,1,1);th.visible=false;g.remove(th);
@@ -2977,7 +2999,7 @@ function fpBuild(){
   // cuff with gold rims and strap
   const cuf=add(cyl,mGd,0,0,-.21,.1,.13,.1);cuf.rotation.x=Math.PI/2;
   [-.15,-.275].forEach(z=>{const r=add(cyl,mT,0,0,z,.105,.02,.105);r.rotation.x=Math.PI/2});
-  add(bxg,mGl,0,.1,-.21,.13,.014,.1);add(bxg,mT,0,.108,-.21,.05,.006,.04);
+  add(bxg,mGd,0,.1,-.21,.13,.014,.1);add(bxg,mT,0,.108,-.21,.05,.006,.04);
 
   g.userData.main=main;
   fpv.add(g);FPM.g[k]=g;
@@ -2988,7 +3010,7 @@ function fpBuild(){
  }
  FPM.pos={L:new THREE.Vector3(-.26,-.2,-.6),R:new THREE.Vector3(.26,-.2,-.6)};FPM.sc={L:1,R:1};FPM.roll={L:0,R:0};FPM.hist={L:[],R:[]};
 }
-function fpGx(){return .34*clamp(camera.aspect/1.6,.5,1)}
+function fpGx(){return .5*clamp(camera.aspect/1.6,.5,1)}
 function fpTarget(h,out){
  const o=E.f.holder;_v3.set(E.fx,(h.kind==='upp'?1.28:1.5)*E.f.hs+(h.kind==='upp'?0:(E.f.hs-1)*.0),E.fz);
  camera.updateMatrixWorld();camera.worldToLocal(_v3);
@@ -3062,7 +3084,7 @@ function fpViewUpdate(dt,on){
   const anc=_v1.copy(cp).add(off);
   _v2.copy(cp).sub(anc);const len=_v2.length();_v2.divideScalar(len);
   const wA=(kd==='hook'||kd==='upp'||kd==='over')?.72:.12;_fd.copy(_v2).multiplyScalar(wA).add(_fo.set(-sx*.1,.9,-1).multiplyScalar(1-wA)).normalize();g.position.copy(cp);_q1.setFromUnitVectors(_vz,_fd);_q2.setFromAxisAngle(_vz,FPM.roll[arm]);g.quaternion.copy(_q1).multiply(_q2);g.scale.setScalar(FPM.sc[arm]*.8*(camera.aspect<.8?.78:1));
-  const fa=FPM.arm[arm],r=.07*FPM.sc[arm]*(camera.aspect<.8?.8:1);
+  const fa=FPM.arm[arm],r=.115*FPM.sc[arm]*(camera.aspect<.8?.8:1);
   const cuffBack=.27*FPM.sc[arm]*.8;
   _v3.copy(cp).addScaledVector(_fd,-cuffBack);_fk.copy(_v3).add(anc).multiplyScalar(.5);
   const fl=_v3.distanceTo(anc);fa.position.copy(_fk);fa.scale.set(r,fl,r);fa.quaternion.setFromUnitVectors(_vy,_fw.copy(_v3).sub(anc).normalize());
@@ -3102,7 +3124,7 @@ function updCamera(raw){
   const sh=port?1.05:.85;tLook.set(E.fx-rx*sh,(port?1.5:1.45)+(E.f.hs-1)*.7,E.fz-rz*sh);
  }
  const fp=!!(G&&G.fps&&!lookMode&&G.mode!=='end'&&P.fx!==undefined);
- if(P&&P.f&&!!P.f._fp!==fp){P.f._fp=fp;P.f.holder.visible=!fp}
+ if(P&&P.f&&!!P.f._fp!==fp){P.f._fp=fp;P.f.head.visible=!fp;['L','R'].forEach(k=>{const g=P.f.arms[k].glove;if(g)g.scale.setScalar(fp?.58:.8)})}
  let fpKo=0;
  if(fp){
   P.f.holder.getWorldPosition(_hp);E.f.holder.getWorldPosition(_fe);
@@ -3122,7 +3144,7 @@ function updCamera(raw){
  camera.lookAt(camLook);
  if(fp){camera.rotateZ(clamp(-(P.vl||0)*.01,-.14,.14)+(P.state==='hit'?Math.sin(timeNow*40)*.02*clamp(P.hitT/(P.hitDur||.3),0,1):0));if(P.state==='hit')camera.rotateX(.05*clamp(P.hitT/(P.hitDur||.3),0,1));if(fpKo)camera.rotateZ(1.35*fpKo)}
  if(G&&G.free&&!lookMode)ringVis(camera.position);
- camera.updateMatrixWorld();fpViewUpdate(raw,fp&&!fpKoHide());
+ camera.updateMatrixWorld();fpViewUpdate(raw,false);
 }
 
 /* ========== HUD ========== */
@@ -3745,7 +3767,7 @@ function renderRoll(B){
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
 /* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
-const GAME_VER='v40';
+const GAME_VER='v42';
 /* в альбомной модель сдвигается влево, панель справа занимает ~54% */
 function lkScale(){
  if(camera.aspect<.8)return 1;
