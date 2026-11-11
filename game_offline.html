@@ -245,6 +245,10 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 @media (max-height:560px){.logo{font-size:16px}.cb{width:58px;height:58px}.dpad{grid-template-columns:repeat(3,50px);grid-template-rows:repeat(3,50px)}.dpad .cb.pd{width:50px;height:50px}#hint{display:none}}
 @media (prefers-reduced-motion:reduce){.ft{animation-duration:.01s}}
 
+.orgTabs{display:flex;gap:6px;margin-bottom:8px}
+.orgTabs button{flex:1;font-family:var(--px);font-size:9px;padding:8px 2px;background:var(--panel);color:var(--muted);border:3px solid #000;box-shadow:inset 0 0 0 2px var(--line);line-height:1.5}
+.orgTabs button small{display:block;font-size:7px;margin-top:2px}
+.orgTabs button.on{color:#201500;background:var(--gold);box-shadow:inset 0 0 0 2px #c98c00}
 /* ===== комната наград ===== */
 #room{background:#0b0d18;padding-left:0;padding-right:0}
 #room .hdr{padding:0 max(14px,env(safe-area-inset-left))}
@@ -372,6 +376,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
  #menu .mR .btn{margin:0;font-size:9px;padding:13px 4px;line-height:1.3}
  #menu #mSet,#menu #mSave{grid-column:auto}
  #menu #mRoom{grid-column:1/-1}
+ #mode #mdFps{grid-column:1/-1}
  #menu .logo{font-size:19px;margin:0}
  #menu .logo small{font-size:7px;margin-top:6px}
  #menu .stats{margin-bottom:6px}
@@ -495,6 +500,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
     <div class="tsec">ВЫБЕРИ ФОРМАТ</div>
     <button class="tcard mcard" id="mdFixed"><div class="tn">ФИКСИРОВАННЫЙ<div class="ts">БОЙЦЫ НА СВОИХ МЕСТАХ · СВАЙПЫ, УКЛОНЫ, БЛОК И БЫСТРЫЕ ОБМЕНЫ УДАРАМИ · ВСЕ СПЕЦПРИЁМЫ</div></div></button>
     <button class="tcard mcard" id="mdFree"><div class="tn">СВОБОДНЫЙ<div class="ts">БОЛЬШОЙ РИНГ · ХОДЬБА СТИКОМ, РЫВКИ, ОБХОД ВРАГА · ВСЕГО 2 СПЕЦПРИЁМА</div></div></button>
+    <button class="tcard mcard" id="mdFps"><div class="tn">ОТ ПЕРВОГО ЛИЦА<div class="ts">СМОТРИШЬ ГЛАЗАМИ БОЙЦА · КАМЕРА САМА СЛЕДИТ ЗА ВРАГОМ · ХОДЬБА, РЫВКИ И КНОПКИ КАК В СВОБОДНОМ РЕЖИМЕ</div></div></button>
   </div>
 
   <div id="tour" class="screen solid" hidden>
@@ -772,7 +778,7 @@ function playerLook(){
  if(!save.look){save.look=genLook(save.seed,false);persist()}
  const k=save.look;if(k.hgt==null){k.hgt=1;k.build=1;k.muscle=2;persist()}
  if(k.fc==null){k.fc=faceId(k);persist()}
- const B=wornBeltObj();return Object.assign({},k,{boss:false,belt:B?B.beltC:0,belt2:B?B.c2C:0,bid:B?B.id:null});
+ const B=wornBeltObj();return Object.assign({},k,{boss:false,belt:B?B.beltC:0,belt2:B?B.c2C:0,bid:B?(B.design||B.id):null});
 }
 const NICK=['Кувалда','Тень','Молот','Змей','Бык','Гроза','Клещ','Волк','Лис','Танк','Ястреб','Таран','Шторм','Булыжник','Стрела','Бетон'];
 /* ----- страны и пиксельные флаги 16x10 ----- */
@@ -926,49 +932,109 @@ const BOSSES={
   bio:'Чемпион мира. Сто килограммов чистых мышц и ни одного поражения за семь лет. Живёт на вершине один, поэтому давно перестал разговаривать: только кивает. Говорят, чтобы забрать его пояс, нужно стать лучше самого себя.',
   look:{skin:0x6b4226,hair:'bald',hairC:0x16161a,beard:true,shorts:0x111115,trim:0xff3d6e,glove:0x111115,shoe:0x111115,shirt:'none',shirtC:0,band:false,bandC:0,tat:true,tatC:0x2a1a1a,scar:true,eye:'#c0392b',hgt:3,build:3,muscle:6,acc:'crown',accC:0xffc83d,glasses:'none',chain:true,wrist:true}}
 };
+/* ===== организации: у каждой свой рейтинг, чемпион мира и чемпионы стран ===== */
+const BASE_SLOTS=['ru','eu','af','sa','asia','am','world'];
+const ORGS=[
+ {id:'ibf',n:'IBF',full:'Международная боксёрская федерация',col:'#b01c2e',c2:'#d8dde6',ranks:[24,18,13,9,6,3,1]},
+ {id:'wbo',n:'WBO',full:'Всемирная боксёрская организация',col:'#17308a',c2:'#f2c200',ranks:[26,20,15,11,8,5,1],
+  ch:[['UA','ЧЕМПИОН УКРАИНЫ'],['GB','ЧЕМПИОН БРИТАНИИ'],['KR','ЧЕМПИОН КОРЕИ'],['ES','ЧЕМПИОН ИСПАНИИ'],['CN','ЧЕМПИОН КИТАЯ'],['CA','ЧЕМПИОН КАНАДЫ'],['IT','ЧЕМПИОН МИРА']],
+  sty:['peek','cnt','swarm','hit','ghost','long','kais']},
+ {id:'wba',n:'WBA',full:'Всемирная боксёрская ассоциация',col:'#e0a800',c2:'#f4f4f4',ranks:[27,21,16,12,7,4,1],
+  ch:[['KZ','ЧЕМПИОН КАЗАХСТАНА'],['FR','ЧЕМПИОН ФРАНЦИИ'],['PL','ЧЕМПИОН ПОЛЬШИ'],['MX','ЧЕМПИОН МЕКСИКИ'],['JP','ЧЕМПИОН ЯПОНИИ'],['BR','ЧЕМПИОН БРАЗИЛИИ'],['US','ЧЕМПИОН МИРА']],
+  sty:['slug','hands','demp','kim','gaz','flick','drag']},
+ {id:'wbc',n:'WBC',full:'Всемирный боксёрский совет',col:'#1b7a3a',c2:'#ffd23f',ranks:[25,19,14,10,6,3,1],
+  ch:[['RU','ЧЕМПИОН РОССИИ'],['DE','ЧЕМПИОН ГЕРМАНИИ'],['NG','ЧЕМПИОН НИГЕРИИ'],['KR','ЧЕМПИОН КОРЕИ'],['US','ЧЕМПИОН США'],['GB','ЧЕМПИОН БРИТАНИИ'],['MX','ЧЕМПИОН МИРА']],
+  sty:['defn','ghost','kim','hit','gaz','thun','phan']}
+];
+const STNAME={peek:'ПИКАБУ',cnt:'КОНТРПАНЧЕР',swarm:'УРАГАНЩИК',hit:'ХИТМАН',ghost:'ГОСТ-ДЖЕБ',long:'ДЛИННЫЙ ГАРД',kais:'КАЙЗЕР',slug:'ДРАЧУН',hands:'ОПУЩЕННЫЕ РУКИ',demp:'ДЭМПСИ-РОЛЛ',kim:'КИМУРА',gaz:'ГАЗЕЛЬ-ПАНЧ',flick:'ФЛИКЕР',drag:'ПУТЬ ДРАКОНА',defn:'СТРАЖ',thun:'ГРОМОВАЯ РУКА',phan:'ФАНТОМ'};
+const BIOS=['Тренируется по шесть часов в день и не пропускает ни одного боя. Соперники знают: легко не будет.','Вырос в тесном зале на окраине, где ринг был вдвое меньше обычного. Любит ближний бой и не боится ударов.','Бывший любитель, который однажды выиграл бой с поломанной рукой. С тех пор его считают упрямцем.','Спокойный и расчётливый. Перед боем долго молчит, а потом заканчивает всё за три раунда.','Фанаты любят его за яркие нокауты. Он обещает зрелище в каждом бою и обычно держит слово.','Много лет держит титул и привык, что к нему готовятся заранее. Но всё равно каждый раз выходит как новичок.'];
+// иконки поясов старой единой лестницы теперь принадлежат IBF
+SPECBELTS.forEach(B=>{if(BASE_SLOTS.includes(B.id)){B.belt='IBF · '+B.belt;B.orgId='ibf'}});
+SPECBELTS.forEach(B=>{if(B.org)B.belt=B.org+' · ПРЕТЕНДЕНТ'});
+const ORGBOSS={};
+ORGS.forEach((O,oi)=>{
+ ORGBOSS[O.id]={};
+ if(O.id==='ibf'){BASE_SLOTS.forEach((k,i)=>{BOSSES[k].orgId='ibf';ORGBOSS.ibf[O.ranks[i]]=k;O.ranks[i]=BOSSES[k].rank});return}
+ BASE_SLOTS.forEach((slot,i)=>{
+  const key=O.id+'_'+slot,[cc,ttl]=O.ch[i],seed=7001+oi*131+i*17,r=rng(seed),world=i===6;
+  const nm=genName(seed,false,cc),L=genLook(seed,true);
+  L.acc=world?'crown':'none';L.glove=parseInt(O.col.slice(1),16);L.trim=parseInt(O.c2.slice(1),16);L.accC=0xffc83d;L.fc=(oi*3+i*5)%12;L.chain=world;
+  const w=24+Math.floor(r()*26),l=Math.floor(r()*5),k=Math.floor(w*(.45+r()*.3));
+  const style=STNAME[O.sty[i]]||'УНИВЕРСАЛ';
+  BOSSES[key]={n:nm,cc,rank:O.ranks[i],belt:key,sty:O.sty[i],title:ttl+(world?' '+O.n:''),age:26+Math.floor(r()*14),rec:w+'-'+l+'-'+k,style,
+   bio:'Чемпион организации '+O.n+(world?' в абсолютном зачёте. ':'. ')+BIOS[Math.floor(r()*BIOS.length)]+' Стиль: «'+style.toLowerCase()+'».',look:L,orgId:O.id};
+  const bl={id:key,belt:O.n+' · '+ttl+(world?'':''),col:O.col,c2:O.c2,cc,design:slot,orgId:O.id};
+  bl.beltC=parseInt(bl.col.slice(1),16);bl.c2C=parseInt(bl.c2.slice(1),16);
+  SPECBELTS.push(bl);ALLBELTS.push(bl);ORGBOSS[O.id][O.ranks[i]]=key;
+ });
+});
 const BOSS_IDS=Object.keys(BOSSES);
-const bossByRank={};BOSS_IDS.forEach(k=>bossByRank[BOSSES[k].rank]=k);
+const orgBossIds=org=>BOSS_IDS.filter(k=>BOSSES[k].orgId===org);
+const worldBeltOf=org=>org==='ibf'?'world':org+'_world';
 const TOUR_BOSS={bronze:'ru',silver:'eu',gold:'am',plat:'asia',dia:'sa'};
 function bossLook(id){
  const B=BOSSES[id],be=beltOf(B.belt);
- return Object.assign({boss:true},B.look,{belt:be.beltC,belt2:be.c2C,bid:be.id,fc:{ru:1,eu:9,af:2,sa:6,asia:4,am:0,world:11}[id]});
+ return Object.assign({boss:true},B.look,{belt:be.beltC,belt2:be.c2C,bid:be.design||be.id,fc:B.look.fc!=null?B.look.fc:{ru:1,eu:9,af:2,sa:6,asia:4,am:0,world:11}[id]});
 }
-/* --- рейтинг --- */
-function proS(){
- if(!save.pro)save.pro={name:'',order:Array.from({length:30},(_,i)=>i+1).concat('P'),pts:0,w:0,l:0,ko:0,beat:{},seen:{}};
+/* --- рейтинг (у каждой организации свой) --- */
+function proNew(){return{name:'',order:Array.from({length:30},(_,i)=>i+1).concat('P'),pts:0,w:0,l:0,ko:0,beat:{},seen:{},cleared:false,chal:null}}
+function proRoot(){
+ if(!save.pro||!save.pro.orgs){const old=save.pro&&save.pro.order?save.pro:null;save.pro={cur:'ibf',orgs:{}};if(old)save.pro.orgs.ibf=old}
+ ORGS.forEach(O=>{const o=save.pro.orgs[O.id]||(save.pro.orgs[O.id]=proNew());if(o.cleared===undefined)o.cleared=o.order.indexOf('P')===0||!!o.beat.world;if(o.chal===undefined)o.chal=null});
+ if(!save.pro.cur)save.pro.cur='ibf';
  return save.pro;
 }
+const proOrg=()=>proRoot().cur;
+const orgOf=id=>ORGS.find(o=>o.id===id);
+function proS(){const R=proRoot();return R.orgs[R.cur]}
 const rankOfP=()=>proS().order.indexOf('P')+1;
 const rankOfId=id=>proS().order.indexOf(id)+1;
-function proFighter(id){
- const bid=bossByRank[id],seed=100003+id*7919;
- const cc=bid?BOSSES[bid].cc:CKEYS[Math.floor(rng(seed+5)()*CKEYS.length)];
- const lv=Math.round(3+(30-id)*1.35)+(bid?2:0);
- const sp={seed,level:lv,boss:!!bid,cc,id,pro:true,theme:themeIdx(bid&&id===1?'arena':COUNTRY_LOC[cc]||'gym')};
- if(bid){sp.bossId=bid;sp.look=bossLook(bid);sp.name=BOSSES[bid].n.toUpperCase()}else sp.name=genName(seed,false,cc);
+const orgRank=org=>proRoot().orgs[org].order.indexOf('P')+1;
+function proFighter(id,org){
+ org=org||proOrg();const oi=ORGS.findIndex(o=>o.id===org),key=ORGBOSS[org][id],seed=100003+id*7919+oi*104729;
+ const cc=key?BOSSES[key].cc:CKEYS[Math.floor(rng(seed+5)()*CKEYS.length)];
+ const lv=Math.round(3+(30-id)*1.35)+(key?2:0);
+ const sp={seed,level:lv,boss:!!key,cc,id,pro:true,org,theme:themeIdx(key&&id===1?'arena':COUNTRY_LOC[cc]||'gym')};
+ if(key){sp.bossId=key;sp.look=bossLook(key);sp.name=BOSSES[key].n.toUpperCase()}else sp.name=genName(seed,false,cc);
  return sp;
 }
+const proReach=()=>{const S0=proS();return S0.cleared?1:Math.max(1,30-(S0.w+S0.l))};
 function proTargets(){
- const r=rankOfP(),o=proS().order,t=[];
- if(r===1){t.push(proFighter(o[1]));return t}
- for(let k=1;k<=3;k++){if(r-k>=1)t.push(proFighter(o[r-k-1]))}
- return t;
+ const S0=proS(),o=S0.order,r=rankOfP(),top=proReach(),rec=[],all=[];
+ for(let k=1;k<=3;k++)if(r-k>=1&&o[r-k-1]!=='P')rec.push(o[r-k-1]);
+ o.forEach((id,i)=>{if(id!=='P'&&(i+1>=top||S0.cleared))all.push(id)});
+ return{rec,all,top};
+}
+function proChallenger(){
+ const S0=proS();if(rankOfP()!==1){S0.chal=null;return null}
+ if(S0.chal==null||S0.order.indexOf(S0.chal)<1||S0.order.indexOf(S0.chal)>4){const pool=S0.order.slice(1,5).filter(x=>x!=='P');S0.chal=pool[Math.floor(Math.random()*pool.length)];persist()}
+ return S0.chal;
+}
+function proTick(){
+ ORGS.forEach(O=>{const o=proRoot().orgs[O.id].order;
+  for(let t=0;t<3;t++)if(Math.random()<.45){const i=1+((Math.random()*10)|0);if(i+1<o.length&&o[i]!=='P'&&o[i+1]!=='P'){const x=o[i];o[i]=o[i+1];o[i+1]=x}}
+ });
 }
 function proResult(win,ko){
- const S0=proS(),sp=proOpp;let msg='';
+ const S0=proS(),sp=proOpp,O=orgOf(proOrg());let msg='';
  if(win){
   S0.w++;if(ko)S0.ko++;
   const tr=rankOfId(sp.id),pr=rankOfP();
   S0.pts+=25+Math.max(0,30-tr);
-  if(tr<pr){S0.order.splice(pr-1,1);S0.order.splice(tr-1,0,'P');msg='ТЫ ПОДНЯЛСЯ НА МЕСТО №'+tr+'<br>'}
-  else msg='ТИТУЛ ЗАЩИЩЕН<br>';
+  if(tr<pr){S0.order.splice(pr-1,1);S0.order.splice(tr-1,0,'P');msg='ТЫ ПОДНЯЛСЯ НА МЕСТО №'+tr+' В '+O.n+'<br>'}
+  else msg=(pr===1?'ТИТУЛ ЗАЩИЩЁН':'ПОБЕДА НАД БОЙЦОМ №'+tr)+'<br>';
   if(sp.bossId){
    S0.beat[sp.bossId]=true;const B=BOSSES[sp.bossId];
    if(!save.belts.includes(B.belt)){save.belts.push(B.belt);msg+='НОВЫЙ ПОЯС: '+beltOf(B.belt).belt+'<br>'}
   }
-  SPECBELTS.forEach(B=>{if(B.org&&rankOfP()<=B.rank&&!save.belts.includes(B.id)){save.belts.push(B.id);msg+='НОВЫЙ ПОЯС: '+B.belt+'<br>'}});
-  if(rankOfP()===1&&!save.belts.includes('world')){save.belts.push('world');msg+='ТЫ №1 В МИРЕ!<br>ПОЯС: ЧЕМПИОН МИРА<br>'}
+  if(rankOfP()===1){
+   S0.cleared=true;const wb=worldBeltOf(O.id);
+   if(!save.belts.includes(wb)){save.belts.push(wb);msg+='ТЫ №1 В '+O.n+'!<br>ПОЯС: '+beltOf(wb).belt+'<br>'}
+  }
+  SPECBELTS.forEach(B=>{if(B.org&&B.id===O.id&&rankOfP()<=B.rank&&!save.belts.includes(B.id)){save.belts.push(B.id);msg+='НОВЫЙ ПОЯС: '+B.belt+'<br>'}});
+  if(S0.w+S0.l===1)msg+='КАЖДЫЙ БОЙ ОТКРЫВАЕТ ЕЩЁ ОДНО МЕСТО ДЛЯ ВЫЗОВА<br>';
  }else{S0.l++;S0.pts=Math.max(0,S0.pts-12);msg='РЕЙТИНГ ПОТЕРЯН: −12<br>'}
+ S0.chal=null;proTick();
  persist();return msg;
 }
 const bossSeen=id=>{const S0=proS();return !!(S0.beat[id]||S0.seen[id]||rankOfId(BOSSES[id].rank>0?BOSSES[id].rank:0)>=rankOfP()-6)};
@@ -2087,7 +2153,7 @@ function updStreaks(dt){
 }
 /* ========== combat ========== */
 const BASE_Z=.75,ROUND_T=45,FREE_T=60,MIND=1.05;
-let freeMode=false;
+let freeMode=false,fpsMode=false;
 let S=stats(),G=null,P=null,E=null;
 let timeNow=0,shake=0,hitstop=0,slow=0,cheer=0,lookMode=false,trainMode=false;
 
@@ -2136,7 +2202,7 @@ function startFight(train){
  resetEnt(P);resetEnt(E);
  P.maxHp=P.hp=S.maxHp;P.maxSt=P.st=S.maxSt;P.hyper=0;
  E.hp=E.maxHp;E.st=E.maxSt=100;E.aiT=1.4;
- G={free:!train&&freeMode,mode:train?'fight':'intro',t:0,round:1,rt:(!train&&freeMode)?FREE_T:ROUND_T,revived:false,win:false,byKO:false,hintT:12,training:!!train,trAtk:true,trDef:false,tDmg:0,tCombo:0,tComboT:0,tBest:0};
+ G={free:!train&&freeMode,fps:!train&&freeMode&&fpsMode,mode:train?'fight':'intro',t:0,round:1,rt:(!train&&freeMode)?FREE_T:ROUND_T,revived:false,win:false,byKO:false,hintT:12,training:!!train,trAtk:true,trDef:false,tDmg:0,tCombo:0,tComboT:0,tBest:0};
  if(train)banner('ТРЕНИРОВКА');else{banner('РАУНД 1');sfx('bell')}
  buildSpecials();
  $('#hud').classList.toggle('free',!!G.free);joy.x=joy.y=0;if(G.free)buildFreeHud();
@@ -2831,7 +2897,7 @@ function animEnt(c,dt){
 }
 
 /* ========== camera: over the shoulder, waist up ========== */
-const camPos=new THREE.Vector3(0,2.4,5.5),camLook=new THREE.Vector3(0,1,0),tPos=new THREE.Vector3(),tLook=new THREE.Vector3();
+const _fe=new THREE.Vector3(),camPos=new THREE.Vector3(0,2.4,5.5),camLook=new THREE.Vector3(0,1,0),tPos=new THREE.Vector3(),tLook=new THREE.Vector3();
 function updCamera(raw){
  const port=camera.aspect<.8;
  if(lookMode){if(!lkPtr){lookRot+=lookVel*raw+(lookAuto?raw*.7:0);lookVel*=Math.exp(-raw*2.2)}
@@ -2855,13 +2921,24 @@ function updCamera(raw){
   tPos.set(clamp(P.fx-dx*back+rx*side,-cm,cm),(port?2.45:2.25)+(P.f.hs-1)*.8+.06*mu,clamp(P.fz-dz*back+rz*side,-cm,cm));
   const sh=port?1.05:.85;tLook.set(E.fx-rx*sh,(port?1.5:1.45)+(E.f.hs-1)*.7,E.fz-rz*sh);
  }
+ const fp=!!(G&&G.fps&&!lookMode&&G.mode==='fight'&&P.fx!==undefined);
+ if(P&&P.f&&P.f.head.visible===fp){P.f.head.visible=!fp;['L','R'].forEach(s=>{const g=P.f.arms[s].glove;if(g)g.scale.setScalar(fp?.8:1)})}
+ if(fp){
+  P.f.holder.getWorldPosition(_hp);E.f.holder.getWorldPosition(_fe);
+  let ex=_fe.x-_hp.x,ez=_fe.z-_hp.z;const ed=Math.hypot(ex,ez)||1;ex/=ed;ez/=ed;
+  const hs=P.f.hs,mv=P.mvs||0,bob=Math.sin(P.gp)*.03*mv,dip=P.state==='hit'?-.05*clamp(P.hitT/(P.hitDur||.3),0,1):0;
+  tPos.set(_hp.x+ex*.17,1.46*hs+.12+bob+dip,_hp.z+ez*.17);
+  tLook.set(_fe.x,1.52+(E.f.hs-1)*.7,_fe.z);
+  const fv=port?96:72;if(camera.fov!==fv||camera.near!==.06){camera.fov=fv;camera.near=.06;camera.updateProjectionMatrix();camera._fp=1}
+ }else if(camera._fp){camera._fp=0;camera.near=.1;resize()}
  if(lookMode&&!port){if(camera.fov!==58){camera.fov=58;camera.updateProjectionMatrix();camera._lk=1}}else if(camera._lk){camera._lk=0;resize()}
- const k=1-Math.exp(-raw*(lookMode?6:(G&&G.free?8:3.6)));
- camPos.lerp(tPos,k);camLook.lerp(tLook,k);
+ const k=1-Math.exp(-raw*(fp?20:lookMode?6:(G&&G.free?8:3.6)));
+ camPos.lerp(tPos,k);camLook.lerp(tLook,fp?1-Math.exp(-raw*16):k);
  shake=Math.max(0,shake-raw*1.6);
  const shk=[0,.55,1][save.opt.shake];
  camera.position.set(camPos.x+(Math.random()-.5)*shake*.35*shk,camPos.y+(Math.random()-.5)*shake*.35*shk,camPos.z);
  camera.lookAt(camLook);
+ if(fp){camera.rotateZ(clamp(-(P.vl||0)*.01,-.14,.14)+(P.state==='hit'?Math.sin(timeNow*40)*.02*clamp(P.hitT/(P.hitDur||.3),0,1):0));if(P.state==='hit')camera.rotateX(.05*clamp(P.hitT/(P.hitDur||.3),0,1))}
  if(G&&G.free&&!lookMode)ringVis(camera.position);
 }
 
@@ -3025,13 +3102,14 @@ function refreshMenu(){
  $('#mOpp').innerHTML='СЛЕДУЮЩИЙ СОПЕРНИК<br><span class="lv">'+(sp.boss?'БОСС · ':'')+'УР.'+sp.level+'</span> '+flagHTML(oppCC(sp))+E.name+'<br>'+COUNTRIES[oppCC(sp)].n.toUpperCase()+' · '+THEMES[locOf(sp)].name.toUpperCase();
  const bl=save.belts.length;$('#mTour').textContent=save.tour?'ТУРНИР '+save.tour.f+'/'+TOURS[save.tour.i].floors:'ТУРНИРЫ';
 }
-function goMenu(){tourMode=false;freeMode=false;proMode=false;proOpp=null;setupScene();show('menu');refreshMenu()}
+function goMenu(){tourMode=false;freeMode=false;fpsMode=false;proMode=false;proOpp=null;setupScene();show('menu');refreshMenu()}
 function fightNow(train){show('none');$('#hud').hidden=false;startFight(train)}
 let modeCb=null,modeBack=null;
 function oppInfo(sp,extra){return (sp.boss?'БОСС · ':'')+'УР.'+sp.level+' '+flagHTML(oppCC(sp))+(sp.name||genName(sp.seed,sp.boss,oppCC(sp)))+'<br>'+COUNTRIES[oppCC(sp)].n.toUpperCase()+' · '+THEMES[locOf(sp)].name.toUpperCase()+'<br>СТИЛЬ: <span style="color:'+stColor(enemyStyle(sp))+'">'+enemyStyle(sp).n+'</span>'+(extra?'<br>'+extra:'')}
 function askMode(title,info,cb,back){modeCb=cb;modeBack=back;$('#mdTitle').textContent=title;$('#mdInfo').innerHTML=info;show('mode')}
-$('#mdFixed').onclick=()=>{sfx('ping');modeCb&&modeCb(false)};
-$('#mdFree').onclick=()=>{sfx('ping');modeCb&&modeCb(true)};
+$('#mdFixed').onclick=()=>{sfx('ping');fpsMode=false;modeCb&&modeCb(false)};
+$('#mdFree').onclick=()=>{sfx('ping');fpsMode=false;modeCb&&modeCb(true)};
+$('#mdFps').onclick=()=>{sfx('ping');fpsMode=true;modeCb&&modeCb(true)};
 $('#mdBack').onclick=()=>{modeBack&&modeBack()};
 $('#mFight').onclick=()=>{sfx('ping');askMode('БЫСТРЫЙ МАТЧ','СЛЕДУЮЩИЙ СОПЕРНИК<br>'+oppInfo(nextOpponent()),free=>{freeMode=free;tourMode=false;proMode=false;setupScene();fightNow(false)},goMenu)};
 $('#mTrain').onclick=()=>{sfx('ping');setupScene(true);fightNow(true)};
@@ -3094,7 +3172,7 @@ function renderTour(){
  go.textContent=act?'НА РИНГ · ЭТАЖ '+save.tour.f:(save.tour?'НАЧАТЬ ЗАНОВО (СБРОСИТ ТЕКУЩИЙ)':'НАЧАТЬ ТУРНИР');
  go.onclick=()=>{
   sfx('ping');
-  const start=free=>{if(!act){save.tour={i:tourView,f:1,lives:2,att:(Math.random()*1e6)|0,free:!!free};persist()}tourMode=true;proMode=false;freeMode=!!save.tour.free;setupScene();fightNow(false)};
+  const start=free=>{if(!act){save.tour={i:tourView,f:1,lives:2,att:(Math.random()*1e6)|0,free:!!free,fps:!!(free&&fpsMode)};persist()}tourMode=true;proMode=false;freeMode=!!save.tour.free;fpsMode=!!(save.tour.free&&save.tour.fps);setupScene();fightNow(false)};
   if(act)start(save.tour.free);
   else askMode(T.n,flagHTML(T.host,true)+COUNTRIES[T.host].n.toUpperCase()+'<br>'+T.floors+' ЭТАЖЕЙ · ФИНАЛ: '+THEMES[themeIdx(T.theme)].name.toUpperCase()+'<br>РЕЖИМ ВЫБИРАЕТСЯ НА ВЕСЬ ТУРНИР',start,()=>{show('tour');renderTour()});
  };
@@ -3351,17 +3429,22 @@ function renderPro(){
  lookSide=(!port&&(prView==='card'||prView==='bio'))?lkSide():0;
  applyVis();
  body.innerHTML='';
- const rk=rankOfP();
+ const rk=rankOfP(),OG=orgOf(proOrg());
+ if(prView!=='bio'){
+  const tabs=document.createElement('div');tabs.className='orgTabs';
+  ORGS.forEach(O=>{const t=document.createElement('button');t.className=O.id===OG.id?'on':'';t.innerHTML=O.n+'<small>№'+orgRank(O.id)+'</small>';t.onclick=()=>{sfx('ping');proRoot().cur=O.id;persist();renderPro()};tabs.appendChild(t)});
+  body.appendChild(tabs);
+ }
  if(prView==='card'){
   $('#prTitle').textContent='КАРТОЧКА БОЙЦА';
   const c=document.createElement('div');c.className='pcard';
   c.innerHTML='<input class="in" id="prName" placeholder="ИМЯ БОЙЦА" maxlength="14" autocomplete="off" autocapitalize="characters" spellcheck="false" value="'+(S0.name||'').replace(/"/g,'')+'">'+
-   '<h3>'+flagHTML(save.cc||'RU',true)+(rk===1?'ЧЕМПИОН МИРА':rk<=30?'В ТОП-30':'ВНЕ ТОП-30')+'</h3>'+
+   '<h3>'+flagHTML(save.cc||'RU',true)+OG.n+' · '+(rk===1?'ЧЕМПИОН МИРА':rk<=30?'В ТОП-30':'ВНЕ ТОП-30')+'</h3><div style="font-size:7px;color:var(--muted);line-height:1.8;margin-bottom:6px">'+OG.full.toUpperCase()+'</div>'+
    '<div class="kv"><div>РАНГ<b>№'+rk+'</b></div><div>РЕЙТИНГ<b>'+ratingOf()+'</b></div><div>РЕКОРД<b>'+S0.w+'-'+S0.l+'</b></div><div>НОКАУТЫ<b>'+S0.ko+'</b></div></div>';
   const row=document.createElement('div');row.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px';
   ALLBELTS.forEach(B=>{if(save.belts.includes(B.id))row.appendChild(beltEl(B,false))});
   if(!row.childNodes.length){const t=document.createElement('p');t.textContent='ПОЯСОВ ПОКА НЕТ. ПОБЕЖДАЙ ЧЕМПИОНОВ В РЕЙТИНГЕ.';c.appendChild(t)}else c.appendChild(row);
-  const p=document.createElement('p');p.textContent=rk===1?'ТЫ НА ВЕРШИНЕ. ЗАЩИЩАЙ ТИТУЛ ОТ №2.':'ЦЕЛЬ: ЗАНЯТЬ МЕСТО №1. БРОСАТЬ ВЫЗОВ МОЖНО БОЙЦАМ НА 1–3 МЕСТА ВЫШЕ. ЭТО ОТДЕЛЬНО ОТ ТУРНИРОВ.';c.appendChild(p);
+  const rc=proReach(),p=document.createElement('p');p.textContent=rk===1?'ТЫ НА ВЕРШИНЕ '+OG.n+'. ТИТУЛ БУДУТ ОСПАРИВАТЬ БОЙЦЫ ИЗ ТОП-5. ТЫ МОЖЕШЬ ВЫЗВАТЬ ЛЮБОГО.':(S0.cleared?'ТЫ УЖЕ БЫЛ НА ВЕРШИНЕ. ВЫЗЫВАТЬ МОЖНО ЛЮБОГО.':'ВЫЗЫВАТЬ МОЖНО БОЙЦОВ С МЕСТА №'+rc+' ПО №30. КАЖДЫЙ БОЙ ОТКРЫВАЕТ ЕЩЁ ОДНО МЕСТО ВЫШЕ.');c.appendChild(p);
   const mk=(t,cls,fn)=>{const b=document.createElement('button');b.className='btn '+cls;b.textContent=t;b.onclick=()=>{sfx('ping');fn()};c.appendChild(b)};
   mk(rk===1?'ЗАЩИТА ТИТУЛА':'ВЫЗВАТЬ НА БОЙ','',()=>{prView='chal';renderPro()});
   const two=document.createElement('div');two.className='two';
@@ -3371,7 +3454,7 @@ function renderPro(){
   body.appendChild(c);
   const inp=c.querySelector('#prName');inp.oninput=()=>{S0.name=inp.value.toUpperCase().replace(/[<>"&]/g,'');persist()};
  }else if(prView==='table'){
-  $('#prTitle').textContent='ТОП-30';
+  $('#prTitle').textContent='ТОП-30 · '+OG.n;
   const o=S0.order,total=o.length;
   for(let i=0;i<total;i++){
    if(o[i]==='P'){
@@ -3379,17 +3462,22 @@ function renderPro(){
    }else body.appendChild(prRow(proFighter(o[i]),()=>{const sp=proFighter(o[i]);if(sp.bossId&&bossSeen(sp.bossId)){prBoss=sp.bossId;prView='bio';renderPro()}else sfx('block')}));
   }
  }else if(prView==='chal'){
-  $('#prTitle').textContent=rk===1?'ЗАЩИТА ТИТУЛА':'ВЫБЕРИ СОПЕРНИКА';
-  proTargets().forEach(sp=>{
-   body.appendChild(prRow(sp,()=>{
-    sfx('ping');
-    askMode('ПРО-БОЙ · №'+rankOfId(sp.id),oppInfo(sp,'СТАВКА: МЕСТО №'+rankOfId(sp.id)),free=>{proMode=true;tourMode=false;proOpp=sp;freeMode=free;setupScene();fightNow(false)},()=>{show('pro');renderPro()});
-   },'ЦЕЛЬ'));
-  });
+  $('#prTitle').textContent=rk===1?'ЗАЩИТА ТИТУЛА · '+OG.n:'ВЫЗОВ · '+OG.n;
+  const T=proTargets(),startFight=sp=>{sfx('ping');askMode('ПРО-БОЙ · №'+rankOfId(sp.id),oppInfo(sp,'СТАВКА: МЕСТО №'+rankOfId(sp.id)),free=>{proMode=true;tourMode=false;proOpp=sp;freeMode=free;setupScene();fightNow(false)},()=>{show('pro');renderPro()})};
+  const lbl=t=>{const d=document.createElement('div');d.className='tsec';d.textContent=t;body.appendChild(d)};
+  if(rk===1){
+   const cid=proChallenger();
+   if(cid!=null){lbl('ТЕБЕ БРОСИЛ ВЫЗОВ ИЗ ТОП-5');body.appendChild(prRow(proFighter(cid),()=>startFight(proFighter(cid)),'ВЫЗОВ'))}
+  }
+  const info=document.createElement('div');info.className='opp';
+  info.textContent=S0.cleared?'ТЫ ПРОШЁЛ ВЕСЬ РЕЙТИНГ. МОЖНО ВЫЗВАТЬ ЛЮБОГО БОЙЦА '+OG.n+'.':'ДОСТУПНЫ МЕСТА №'+T.top+'–30. КАЖДЫЙ БОЙ В '+OG.n+' ОТКРЫВАЕТ ЕЩЁ ОДНО МЕСТО ВЫШЕ. ВЫШЕ №1 ПОДНИМЕШЬСЯ, ОТКРОЕТСЯ ВСЁ.';
+  body.appendChild(info);
+  lbl(rk===1?'ВЫЗВАТЬ САМОМУ':'СОПЕРНИКИ');
+  T.all.forEach(id=>{const sp=proFighter(id);body.appendChild(prRow(sp,()=>startFight(sp),T.rec.includes(id)?'ЦЕЛЬ':''))});
  }else if(prView==='dos'){
-  $('#prTitle').textContent='ДОСЬЕ ЧЕМПИОНОВ';
+  $('#prTitle').textContent='ДОСЬЕ · '+OG.n;
   const info=document.createElement('div');info.className='opp';info.textContent='ИМЕННЫЕ ЧЕМПИОНЫ ОТКРЫВАЮТСЯ, КОГДА ТЫ ПОДБЕРЁШЬСЯ БЛИЗКО К НИМ В ТОПЕ ИЛИ ВСТРЕТИШЬ ИХ В БОЮ.';body.appendChild(info);
-  BOSS_IDS.slice().sort((a,b)=>BOSSES[a].rank-BOSSES[b].rank).forEach(id=>{
+  orgBossIds(OG.id).sort((a,b)=>BOSSES[a].rank-BOSSES[b].rank).forEach(id=>{
    const B=BOSSES[id],seen=bossSeen(id),be=beltOf(B.belt),d=document.createElement('button');d.className='tcard'+(seen?'':' lock');
    d.appendChild(beltEl(be,!S0.beat[id]));
    const tx=document.createElement('div');tx.className='tn';
@@ -3474,7 +3562,7 @@ function renderRoll(B){
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
 /* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
-const GAME_VER='v30';
+const GAME_VER='v32';
 /* в альбомной модель сдвигается влево, панель справа занимает ~54% */
 function lkScale(){
  if(camera.aspect<.8)return 1;
@@ -3530,8 +3618,9 @@ function setSet(r,v){
 }
 function backupCode(){return 'PBX1:'+btoa(unescape(encodeURIComponent(JSON.stringify(save))))}
 function restoreCode(txt){
- txt=(txt||'').trim();
- if(!txt.startsWith('PBX1:'))throw new Error('Это не код прогресса');
+ const m=/PBX1:[A-Za-z0-9+\/=]+/.exec((txt||'').replace(/\s+/g,''));
+ if(!m)throw new Error('Это не код прогресса');
+ txt=m[0];
  const d=JSON.parse(decodeURIComponent(escape(atob(txt.slice(5)))));
  if(!d||typeof d!=='object'||typeof d.money!=='number'||!d.seed)throw new Error('Код повреждён');
  return d;
@@ -3598,6 +3687,13 @@ function renderSet(){
    Object.assign(save,d);persist();setMsg='ПРОГРЕСС ЗАГРУЖЕН';msg.textContent=setMsg;
    setTimeout(()=>location.reload(),500);
   }catch(e){setMsg='ОШИБКА: '+e.message.toUpperCase();msg.textContent=setMsg}
+ });
+ m2('ЗАГРУЗИТЬ ИЗ ФАЙЛА',()=>{
+  const fi=document.createElement('input');fi.type='file';fi.accept='.txt,text/plain,text/*';fi.style.display='none';document.body.appendChild(fi);
+  fi.onchange=()=>{const f=fi.files&&fi.files[0];fi.remove();if(!f)return;
+   const rd=new FileReader();rd.onload=()=>{try{const d=restoreCode(String(rd.result));Object.assign(save,d);persist();setMsg='ПРОГРЕСС ЗАГРУЖЕН ИЗ ФАЙЛА';msg.textContent=setMsg;setTimeout(()=>location.reload(),500)}catch(e){setMsg='ОШИБКА: '+e.message.toUpperCase();msg.textContent=setMsg}};
+   rd.onerror=()=>{msg.textContent='НЕ УДАЛОСЬ ПРОЧИТАТЬ ФАЙЛ'};rd.readAsText(f)};
+  fi.click();
  });
  B.appendChild(a2);B.appendChild(msg);
 }
@@ -3685,11 +3781,12 @@ function sprGong(){
  return c}
 const SPR={cup:sprCup,medal:sprMedal};
 function awardSync(){
- SPECBELTS.forEach(B=>{if(B.org&&rankOfP()<=B.rank&&!save.belts.includes(B.id))save.belts.push(B.id)});
- if(rankOfP()===1&&!save.belts.includes('world'))save.belts.push('world');
+ proRoot();
+ SPECBELTS.forEach(B=>{if(B.org&&orgRank(B.id)<=B.rank&&!save.belts.includes(B.id))save.belts.push(B.id)});
+ ORGS.forEach(O=>{if(orgRank(O.id)===1&&!save.belts.includes(worldBeltOf(O.id)))save.belts.push(worldBeltOf(O.id))});
 }
 function awardList(){
- const S0=proS(),st=save.st,r=rankOfP(),W=save.wins,L=[];
+ const R0=proRoot(),st=save.st,r=Math.min.apply(null,ORGS.map(o=>orgRank(o.id))),W=save.wins,L=[],proW=ORGS.reduce((s,o)=>s+R0.orgs[o.id].w,0),beatAny=k=>ORGS.some(o=>R0.orgs[o.id].beat[k]);
  const A=(o)=>{o.got=o.cond;L.push(o)};
  const cups=[['bronze','КУБОК РОССИИ','Россия','Бронзовый турнир. Пять этажей, пять соперников и чемпион России в финале. Здесь начинается путь любого чемпиона.'],
   ['silver','КУБОК ГЕРМАНИИ','Германия','Серебряный турнир в порту Гамбурга. Немцы дерутся холодно и точно, ошибиться здесь нельзя.'],
@@ -3697,7 +3794,7 @@ function awardList(){
   ['plat','КУБОК ЯПОНИИ','Япония','Платиновый турнир в додзё. Тишина, дисциплина и бойцы, которые видят удар раньше, чем он начался.'],
   ['dia','КУБОК БРАЗИЛИИ','Бразилия','Алмазный турнир на пляже. Самый длинный путь из всех, десять этажей под палящим солнцем.']];
  cups.forEach(([id,n,cn,ds],i)=>{const T=TOURS[i];A({id:'cup_'+id,sec:'cup',kind:'cup',name:n,col:T.beltC,cond:save.belts.includes(T.id),desc:ds,how:'Пройти турнир «'+T.n+'» ('+cn+') до конца и победить чемпиона в финале.',tag:'ТУРНИР'})});
- A({id:'cup_world',sec:'cup',kind:'cup',name:'КУБОК МИРА',col:0xffd23f,cond:r===1,desc:'Главный приз в боксе. Его получает только тот, кто стоит на первой строчке мирового рейтинга. Весь зал будет помнить этот бой.',how:'Занять первое место в про-рейтинге.',tag:'РЕЙТИНГ',prog:[31-r,30]});
+ A({id:'cup_world',sec:'cup',kind:'cup',name:'КУБОК МИРА',col:0xffd23f,cond:r===1,desc:'Главный приз в боксе. Его получает только тот, кто стоит на первой строчке мирового рейтинга. Весь зал будет помнить этот бой.',how:'Занять первое место в про-рейтинге любой организации.',tag:'РЕЙТИНГ',prog:[31-r,30]});
  A({id:'cup_top10',sec:'cup',kind:'cup',name:'КУБОК ТОП-10',col:0xc9d2dc,cond:r<=10,desc:'Десятка сильнейших бойцов планеты. Отсюда уже видно вершину, но и дорога наверх самая трудная.',how:'Подняться в первую десятку про-рейтинга.',tag:'РЕЙТИНГ',prog:[Math.max(0,31-r),21]});
  A({id:'cup_coll',sec:'cup',kind:'cup',name:'КУБОК КОЛЛЕКЦИОНЕРА',col:0xb57bff,cond:(save.styles||[]).length>=8,desc:'Тот, кто знает много школ, не боится ни одного соперника. Восемь стилей боя в коллекции — это уже библиотека.',how:'Собрать 8 стилей боя в рулетке.',tag:'СТИЛИ',prog:[Math.min(8,(save.styles||[]).length),8]});
  A({id:'cup_master',sec:'cup',kind:'cup',name:'КУБОК МАСТЕРА СТИЛЕЙ',col:0xff3d6e,cond:(save.styles||[]).length>=STYLES.length-1,desc:'Все стили боя собраны. Ты знаешь каждую школу, каждую стойку и каждый секретный приём.',how:'Собрать все стили боя.',tag:'СТИЛИ',prog:[Math.min(STYLES.length-1,(save.styles||[]).length),STYLES.length-1]});
@@ -3709,15 +3806,15 @@ function awardList(){
   ['mflaw','ЧИСТАЯ РАБОТА',5,0x52e08a,0x1c1c22,'Пять побед без единого пропущенного удара. Соперники не успевали даже прикоснуться.',st.flaw,'идеальных побед'],
   ['mstr','СЕРИЯ ПОБЕД',5,0xff8c3a,0x1c1c22,'Пять побед подряд без поражений. Хорошая серия ломает психику соперников.',st.best,'побед подряд'],
   ['mfree','ВОЛЬНЫЙ БОЕЦ',10,0x4aa8ff,0x1c1c22,'Десять побед в свободном режиме, где нужно самому ходить по рингу и ловить момент.',st.free,'побед в свободном режиме'],
-  ['mpro','ПРОФЕССИОНАЛ',10,0xd81b60,0x1c1c22,'Десять побед в про-рейтинге. Ты уже не любитель, а настоящий профессионал.',S0.w,'побед в рейтинге']];
+  ['mpro','ПРОФЕССИОНАЛ',10,0xd81b60,0x1c1c22,'Десять побед в про-рейтинге. Ты уже не любитель, а настоящий профессионал.',proW,'побед в рейтинге']];
  med.forEach(m=>A({id:m[0],sec:'medal',kind:'medal',name:m[1],col:m[3],rib:m[4],cond:m[6]>=m[2],desc:m[5],how:'Набрать '+m[2]+' '+m[7]+(m[0]==='mfree'||m[0]==='mpro'?'.':'.'),tag:'МЕДАЛЬ',prog:[Math.min(m[2],m[6]),m[2]]}));
  TOURS.forEach((T,i)=>A({id:'b_'+T.id,sec:'belt',kind:'belt',bid:T.id,name:T.belt,col:T.beltC,cond:save.belts.includes(T.id),desc:'Пояс победителя турнира «'+T.n+'». '+T.title+' получает его вместе с кубком.',how:'Выиграть турнир «'+T.n+'».',tag:'ТУРНИР · '+T.title}));
  SPECBELTS.forEach(B=>{
-  const bs=BOSS_IDS.find(k=>BOSSES[k].belt===B.id),bo=bs?BOSSES[bs]:null;
-  if(bo)A({id:'b_'+B.id,sec:'belt',kind:'belt',bid:B.id,name:B.belt,col:B.beltC,col2:B.c2C,cond:save.belts.includes(B.id),desc:'Титул принадлежал бойцу по имени '+bo.n+' ('+COUNTRIES[bo.cc].n+', место №'+bo.rank+' в рейтинге). '+bo.style+' — вот его конёк.',how:'Победить бойца '+bo.n+' в про-рейтинге.',tag:B.belt});
-  else if(B.org)A({id:'b_'+B.id,sec:'belt',kind:'belt',bid:B.id,name:B.belt,col:B.beltC,col2:B.c2C,cond:save.belts.includes(B.id),desc:ORGINFO[B.id]+' ('+B.org+') выдаёт этот пояс бойцам, вошедшим в её рейтинг. Он лежит в этой комнате как знак признания.',how:'Войти в первые '+B.rank+' мест про-рейтинга (сейчас у тебя место №'+r+').',tag:B.org+' · РЕЙТИНГ ДО №'+B.rank,prog:[Math.max(0,Math.min(B.rank,31-r)),31-B.rank]});
+  const bs=BOSS_IDS.find(k=>BOSSES[k].belt===B.id),bo=bs?BOSSES[bs]:null,og=B.orgId?orgOf(B.orgId):null;
+  if(bo)A({id:'b_'+B.id,sec:'belt',kind:'belt',bid:B.id,name:B.belt,col:B.beltC,col2:B.c2C,cond:save.belts.includes(B.id),desc:'Титул '+(bo.title)+' ('+(og?og.n:'')+') принадлежит бойцу по имени '+bo.n+' ('+COUNTRIES[bo.cc].n+'). '+bo.style+' — вот его конёк.',how:'Победить бойца '+bo.n+' в рейтинге '+(og?og.n:'')+'.',tag:B.belt});
+  else if(B.org){const o=orgOf(B.id),rk=orgRank(B.id);A({id:'b_'+B.id,sec:'belt',kind:'belt',bid:B.id,name:B.belt,col:B.beltC,col2:B.c2C,cond:save.belts.includes(B.id),desc:o.full+' ('+B.org+') выдаёт этот пояс бойцам, вошедшим в её рейтинг. Он лежит в этой комнате как знак признания.',how:'Войти в первые '+B.rank+' мест рейтинга '+B.org+' (сейчас у тебя место №'+rk+').',tag:B.org+' · РЕЙТИНГ ДО №'+B.rank,prog:[Math.max(0,Math.min(B.rank,31-rk)),31-B.rank]})}
  });
- A({id:'x_gloves',sec:'misc',kind:'gloves',name:'ЗОЛОТЫЕ ПЕРЧАТКИ',col:0xffc83d,cond:BOSS_IDS.every(k=>S0.beat[k]),desc:'Именные перчатки, которые вручают тому, кто побил всех семерых чемпионов мира, Европы, Азии и других континентов.',how:'Победить всех семерых боссов про-рейтинга.',tag:'ПАМЯТНОЕ',prog:[BOSS_IDS.filter(k=>S0.beat[k]).length,BOSS_IDS.length]});
+ A({id:'x_gloves',sec:'misc',kind:'gloves',name:'ЗОЛОТЫЕ ПЕРЧАТКИ',col:0xffc83d,cond:ORGS.every(o=>beatAny(BASE_SLOTS[6]==='world'&&o.id==='ibf'?'world':o.id+'_world')),desc:'Именные перчатки, которые вручают тому, кто побил всех четырёх чемпионов мира: по одному из каждой организации.',how:'Победить чемпиона мира в IBF, WBO, WBA и WBC.',tag:'ПАМЯТНОЕ',prog:[ORGS.filter(o=>beatAny(o.id==='ibf'?'world':o.id+'_world')).length,ORGS.length]});
  A({id:'x_pig',sec:'misc',kind:'pig',name:'ЗОЛОТАЯ КОПИЛКА',col:0xff9ec0,cond:st.maxMoney>=5000,desc:'Бокс — это ещё и деньги. Эта копилка выдана за то, что у тебя когда-то накопилось пять тысяч монет.',how:'Накопить 5000 монет.',tag:'ПАМЯТНОЕ',prog:[Math.min(5000,st.maxMoney),5000]});
  A({id:'x_p30',sec:'misc',kind:'plaque',txt:'30',name:'ТАБЛИЧКА: ТОП-30',col:0x52e08a,cond:r<=30,desc:'Первая памятная табличка в рейтинге. Твоё имя теперь значится в списке тридцати лучших.',how:'Войти в первые 30 мест про-рейтинга.',tag:'РЕЙТИНГ'});
  A({id:'x_p10',sec:'misc',kind:'plaque',txt:'10',name:'ТАБЛИЧКА: ТОП-10',col:0xffc83d,cond:r<=10,desc:'Золотая табличка десятки сильнейших. Её вешают на самое видное место.',how:'Войти в первые 10 мест про-рейтинга.',tag:'РЕЙТИНГ'});
@@ -3728,7 +3825,7 @@ function awardList(){
 function awSprite(a){
  switch(a.kind){
   case 'cup':return sprCup(a.col);case 'medal':return sprMedal(a.col,a.rib);
-  case 'belt':{const B=beltOf(a.bid);return sprBelt(a.bid,B.beltC,B.c2C)}
+  case 'belt':{const B=beltOf(a.bid);return sprBelt(B.design||a.bid,B.beltC,B.c2C)}
   case 'gloves':return sprGloves(a.col);case 'pig':return sprPig();case 'gong':return sprGong();
   case 'plaque':return sprPlaque(a.txt,a.col);
  }
