@@ -2186,18 +2186,45 @@ function tierColor(t){
 }
 function smat(c){return smats[c]||(smats[c]=new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.6,depthWrite:false}))}
 const _tgt=new THREE.Vector3();
+let _softTex=null;
+function softTex(){
+ if(_softTex)return _softTex;
+ const W=128,H=32,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),id=x.createImageData(W,H);
+ for(let j=0;j<H;j++)for(let i=0;i<W;i++){
+  const u=i/(W-1),v=(j-(H-1)/2)/((H-1)/2);
+  const tail=Math.pow(u,1.5),head=1-Math.pow(Math.max(0,(u-.82)/.18),2);
+  const a=Math.max(0,Math.min(1,tail*head*Math.exp(-v*v*3)));
+  const o=(j*W+i)*4;id.data[o]=id.data[o+1]=id.data[o+2]=255;id.data[o+3]=Math.round(a*255);
+ }
+ x.putImageData(id,0,0);const t=new THREE.CanvasTexture(c);t.minFilter=t.magFilter=THREE.LinearFilter;return _softTex=t;
+}
+const _softGeo=new THREE.PlaneGeometry(1,1),_sxA=new THREE.Vector3(),_syA=new THREE.Vector3(),_szA=new THREE.Vector3(),_sM=new THREE.Matrix4();
 function streakAt(pos,dir,len,th,color,life,vel){
- if(streaks.length>120)return;
- const m=new THREE.Mesh(BOX,smat(color));
- m.position.copy(pos).addScaledVector(dir,-len*.5);_tgt.copy(m.position).add(dir);m.lookAt(_tgt);
- m.scale.set(th,th,len);scene.add(m);
- streaks.push({m,life,max:life,th,len,v:vel||null});
+ if(streaks.length>90)return;
+ const parts=[];
+ for(const [wm,op] of[[10,.42],[4,.85]]){
+  const mat=new THREE.MeshBasicMaterial({map:softTex(),color,transparent:true,opacity:op,depthWrite:false,side:THREE.DoubleSide});
+  const m=new THREE.Mesh(_softGeo,mat);m.renderOrder=5;scene.add(m);parts.push({m,wm,op});
+ }
+ const s={parts,life,max:life,th,len,pos:pos.clone().addScaledVector(dir,-len*.5),dir:dir.clone().normalize()};
+ streaks.push(s);orientStreak(s,1);
+}
+function orientStreak(s,k){
+ _sxA.copy(s.dir);
+ for(const p of s.parts){
+  const m=p.m;m.position.copy(s.pos);
+  _szA.copy(camera.position).sub(m.position);_szA.addScaledVector(_sxA,-_szA.dot(_sxA));
+  if(_szA.lengthSq()<1e-6)_szA.set(0,1,0);_szA.normalize();_syA.crossVectors(_szA,_sxA);
+  _sM.makeBasis(_sxA,_syA,_szA);m.quaternion.setFromRotationMatrix(_sM);
+  const spread=1+.7*(1-k);m.scale.set(s.len*(1+.25*(1-k)),Math.max(.02,s.th*p.wm*spread),1);
+  m.material.opacity=p.op*Math.pow(k,.9);
+ }
 }
 function updStreaks(dt){
  for(let i=streaks.length-1;i>=0;i--){
   const s=streaks[i];s.life-=dt;
-  if(s.life<=0){scene.remove(s.m);streaks.splice(i,1);continue}
-  const k=s.life/s.max;s.m.scale.set(s.th*k,s.th*k,s.len);
+  if(s.life<=0){for(const p of s.parts){scene.remove(p.m);p.m.material.dispose()}streaks.splice(i,1);continue}
+  orientStreak(s,s.life/s.max);
  }
 }
 /* ========== combat ========== */
@@ -3124,7 +3151,7 @@ function updCamera(raw){
   const sh=port?1.05:.85;tLook.set(E.fx-rx*sh,(port?1.5:1.45)+(E.f.hs-1)*.7,E.fz-rz*sh);
  }
  const fp=!!(G&&G.fps&&!lookMode&&G.mode!=='end'&&P.fx!==undefined);
- if(P&&P.f&&!!P.f._fp!==fp){P.f._fp=fp;P.f.head.visible=!fp;['L','R'].forEach(k=>{const g=P.f.arms[k].glove;if(g)g.scale.setScalar(fp?.58:.8)})}
+ if(P&&P.f&&!!P.f._fp!==fp){P.f._fp=fp;fpBody(P.f,fp);['L','R'].forEach(k=>{const g=P.f.arms[k].glove;if(g)g.scale.setScalar(fp?.58:.8)})}
  let fpKo=0;
  if(fp){
   P.f.holder.getWorldPosition(_hp);E.f.holder.getWorldPosition(_fe);
@@ -3767,7 +3794,7 @@ function renderRoll(B){
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
 /* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
-const GAME_VER='v42';
+const GAME_VER='v43';
 /* в альбомной модель сдвигается влево, панель справа занимает ~54% */
 function lkScale(){
  if(camera.aspect<.8)return 1;
