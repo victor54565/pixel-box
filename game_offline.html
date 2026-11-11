@@ -2937,27 +2937,51 @@ function fpBuild(){
  while(fpv.children.length)fpv.remove(fpv.children[0]);fpv.userData.key=key;
  const lm=(c,o)=>new THREE.MeshPhongMaterial(Object.assign({color:c,shininess:45,specular:0x666666},o||{}));
  const mG=lm(L.glove),mGd=lm(shade(L.glove,.7)),mGl=lm(shade(L.glove,1.25)),mW=lm(0xeef0f6),mS=lm(shade(L.skin,.95),{shininess:6,specular:0x111111}),mT=lm(L.trim!=null?L.trim:0xffc83d,{shininess:70,specular:0xaaaaaa});
- FPM.arm={};FPM.g={};FPM.ghost={};FPM.sp={};
+ FPM.arm={};FPM.off={};FPM.g={};FPM.ghost={};FPM.sp={};
  for(const [k,sx] of[['L',-1],['R',1]]){
   const g=new THREE.Group(),add=(geo,m,x,y,z,sx2,sy,sz)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.scale.set(sx2||1,sy||1,sz||1);g.add(o);return o};
-  const sph=new THREE.SphereGeometry(1,16,12),cyl=new THREE.CylinderGeometry(1,1,1,16),bxg=new THREE.BoxGeometry(1,1,1);
-  const main=add(sph,mG,0,0,0,.16,.15,.175);
-  add(sph,mGl,0,.06,-.04,.135,.09,.13);
-  // finger roll: stacked rounded bars at the front
-  [[.06,.125,mG],[-.005,.14,mGd],[-.07,.12,mG]].forEach(q=>{const bar=add(cyl,q[2],0,q[0],q[1],.052,.25,.052);bar.rotation.z=Math.PI/2;add(sph,q[2],-.125,q[0],q[1],.052,.052,.052);add(sph,q[2],.125,q[0],q[1],.052,.052,.052)});
-  // gold side swooshes + back stripe
-  [-1,1].forEach(q=>{const w=add(sph,mT,q*.151,-.005,-.03,.008,.085,.13);w.rotation.x=-.25*q;const w2=add(sph,mT,q*.146,.07,-.1,.007,.04,.07);w2.rotation.x=.4});
-  add(bxg,mT,0,.138,-.01,.04,.01,.17);add(bxg,mGd,0,.14,-.01,.012,.011,.18);
-  // thumb
-  add(sph,mG,-sx*.145,.02,-.05,.065,.06,.075);add(sph,mG,-sx*.158,.0,.04,.06,.055,.07);add(sph,mGl,-sx*.14,-.035,.115,.048,.045,.05);
-  add(bxg,mGd,-sx*.2,.0,.0,.006,.05,.2);
-  // cuff
-  const cuf=add(cyl,mGd,0,0,-.19,.105,.12,.105);cuf.rotation.x=Math.PI/2;
-  [-.135,-.245].forEach(z=>{const r=add(cyl,mT,0,0,z,.112,.022,.112);r.rotation.x=Math.PI/2});
-  add(bxg,mGl,0,.108,-.19,.15,.024,.1);add(bxg,mW,0,.122,-.19,.06,.006,.05);
+  const sph=new THREE.SphereGeometry(1,16,12),cyl=new THREE.CylinderGeometry(1,1,1,18),bxg=new THREE.BoxGeometry(1,1,1);
+  // glove body: one sculpted mesh with painted stripes
+  const gg=new THREE.SphereGeometry(1,36,26),pa=gg.attributes.position,cols=new Float32Array(pa.count*3),cb=new THREE.Color(L.glove),cd=new THREE.Color(shade(L.glove,.55)),cgd=new THREE.Color(L.trim!=null?L.trim:0xffc83d),tmp=new THREE.Color();
+  for(let i=0;i<pa.count;i++){
+   let x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);
+   // base proportions (z: wrist -> knuckles)
+   let X=x*.19,Y=y*.18,Z=z*.205;
+   const back=Math.max(0,-z-.2);                       // wrist taper
+   X*=1-.25*back;Y*=1-.22*back;
+   const frontLow=Math.max(0,z-.2)*Math.max(0,-y+.35); // fingers curl bulge below the front
+   Z+=frontLow*.05;Y-=frontLow*.03;
+   const crease=Math.exp(-Math.pow((y+.16)/.1,2))*Math.max(0,z-.12);   // groove where fingers meet palm
+   const k=1-.075*crease;X*=k;Y*=k;Z*=k;
+   Y+=.012*Math.max(0,y)*(1-Math.abs(z));              // domed back of the hand
+   pa.setXYZ(i,X,Y,Z);
+   // colours: black body, gold swoosh on sides and a gold band at the wrist, dark crease
+   let c=cb;
+   const ax=Math.abs(x);
+   const diag=y+.55*(z-.05);
+   if(ax>.72&&diag>-.18&&diag<-.02&&z>-.35)c=cgd;
+   if(ax>.72&&diag>.1&&diag<.15&&z>-.2)c=cgd;
+   if(z<-.62&&z>-.78)c=cgd;
+   if(crease>.35)c=cd;
+   tmp.copy(c);cols[i*3]=tmp.r;cols[i*3+1]=tmp.g;cols[i*3+2]=tmp.b;
+  }
+  gg.setAttribute('color',new THREE.BufferAttribute(cols,3));gg.computeVertexNormals();
+  const mV=new THREE.MeshPhongMaterial({vertexColors:true,shininess:30,specular:0x3a3a3a});
+  const main=add(gg,mV,0,0,0,1,1,1);
+  // thumb lying along the inner side
+  const th=add(sph,mV,0,0,0,1,1,1);th.visible=false;g.remove(th);
+  const thG=new THREE.SphereGeometry(1,16,12);
+  const thumb=new THREE.Mesh(thG,mG);thumb.position.set(-sx*.15,-.05,.06);thumb.scale.set(.06,.055,.115);thumb.rotation.set(-.15,-sx*.2,0);g.add(thumb);
+  const thumbTip=new THREE.Mesh(sph,mG);thumbTip.position.set(-sx*.135,-.075,.15);thumbTip.scale.set(.05,.048,.055);g.add(thumbTip);
+  add(bxg,mGd,-sx*.15,-.012,.1,.006,.012,.12);
+  // cuff with gold rims and strap
+  const cuf=add(cyl,mGd,0,0,-.21,.1,.13,.1);cuf.rotation.x=Math.PI/2;
+  [-.15,-.275].forEach(z=>{const r=add(cyl,mT,0,0,z,.105,.02,.105);r.rotation.x=Math.PI/2});
+  add(bxg,mGl,0,.1,-.21,.13,.014,.1);add(bxg,mT,0,.108,-.21,.05,.006,.04);
+
   g.userData.main=main;
   fpv.add(g);FPM.g[k]=g;
-  const fa=new THREE.Mesh(cyl,mS);fa.userData.sx=sx;fpv.add(fa);FPM.arm[k]=fa;
+  const fa=new THREE.Mesh(new THREE.CylinderGeometry(.74,1,1,18),mS);fa.userData.sx=sx;fpv.add(fa);FPM.arm[k]=fa;
   const sl=new THREE.Mesh(cyl,mT);fpv.add(sl);FPM.sp[k]=sl;
   const gh=[];for(let i=0;i<4;i++){const o=new THREE.Mesh(sph,new THREE.MeshBasicMaterial({color:L.glove,transparent:true,opacity:.28-i*.06,depthWrite:false}));o.scale.setScalar(.13);o.visible=false;fpv.add(o);gh.push(o)}
   FPM.ghost[k]=gh;
@@ -3001,7 +3025,7 @@ function fpArmState(arm,sx,gx,t,res){
  else if(P.state==='stun'){gp.set(sx*.3+Math.sin(timeNow*9)*.03,-.4,-.5)}
  else if(P.state==='hit'){const k=clamp(P.hitT/(P.hitDur||.3),0,1);gp.x*=1-.5*k;gp.y-=.08*k;gp.z+=.1*k}
  else if(P.castT>0){gp.set(sx*.14,-.02,-.55);sc=1.3}
- r.pos.copy(gp);r.sc=sc;r.roll=roll;
+ r.pos.copy(gp);r.sc=sc;r.roll=roll;r.kind=null;
  if(P.state==='atk'&&P.atk){
   const a=P.atk,hs=a.hits.filter(h=>h.arm===arm);
   let prevP=gp.clone(),prevRoll=roll;
@@ -3009,6 +3033,7 @@ function fpArmState(arm,sx,gx,t,res){
    const h=hs[i];fpPoseOf(h,arm,sx,gx,_pp);
    const ws=h.at-h.w,ext=Math.min(_pp.ext,h.w*_pp.frac),ss=h.at-ext,end=h.at+h.s+.05;
    if(t<ws){r.pos.copy(prevP);r.roll=prevRoll;return}
+   r.kind=h.kind;
    if(t<ss){const u=eo(clamp((t-ws)/Math.max(.001,ss-ws),0,1));r.pos.lerpVectors(prevP,_pp.W,u);r.roll=prevRoll+(0-prevRoll)*u;r.sc=1.0+.1*u;return}
    if(t<end){const u0=clamp((t-ss)/Math.max(.001,ext),0,1),u=u0>=1?1:(h.kind==='jab'||h.kind==='cross'?eob(u0):eo(u0)*1.0);
     const v=1-u;r.pos.set(v*v*_pp.W.x+2*v*u*_pp.C.x+u*u*_pp.K.x,v*v*_pp.W.y+2*v*u*_pp.C.y+u*u*_pp.K.y,v*v*_pp.W.z+2*v*u*_pp.C.z+u*u*_pp.K.z);
@@ -3029,11 +3054,16 @@ function fpViewUpdate(dt,on){
   fpArmState(arm,sx,gx,t,_st[arm]);
   const cp=FPM.pos[arm],tg=_st[arm].pos;
   cp.lerp(tg,P.state==='atk'?1-Math.exp(-dt*80):k);FPM.sc[arm]+=(_st[arm].sc-FPM.sc[arm])*k;FPM.roll[arm]+=(_st[arm].roll-FPM.roll[arm])*k;
-  const g=FPM.g[arm],anc=_v1.set(sx*(.55*clamp(camera.aspect/1.6,.5,1)+.1),-.95,-.12);
+  const g=FPM.g[arm],pt=camera.aspect<.8?.75:1,kd=_st[arm].kind;
+  const off=FPM.off[arm]||(FPM.off[arm]=new THREE.Vector3(0,-.75,-.1));
+  const dA=_fo.set(sx*(.55*clamp(camera.aspect/1.6,.5,1)+.1),-.95,-.12).sub(cp);
+  const sp=kd==='hook'?_fw.set(sx*1.2*pt,-.5,.25):kd==='upp'?_fw.set(sx*.04,-1.3,.2):kd==='over'?_fw.set(sx*.4,1.2,.2):dA;
+  off.lerp(sp,1-Math.exp(-dt*(kd?26:12)));
+  const anc=_v1.copy(cp).add(off);
   _v2.copy(cp).sub(anc);const len=_v2.length();_v2.divideScalar(len);
-  _fd.copy(_v2).multiplyScalar(.12).add(_fo.set(-sx*.1,.62,-1).multiplyScalar(.88)).normalize();g.position.copy(cp);_q1.setFromUnitVectors(_vz,_fd);_q2.setFromAxisAngle(_vz,FPM.roll[arm]);g.quaternion.copy(_q1).multiply(_q2);g.scale.setScalar(FPM.sc[arm]*.8*(camera.aspect<.8?.78:1));
+  const wA=(kd==='hook'||kd==='upp'||kd==='over')?.72:.12;_fd.copy(_v2).multiplyScalar(wA).add(_fo.set(-sx*.1,.9,-1).multiplyScalar(1-wA)).normalize();g.position.copy(cp);_q1.setFromUnitVectors(_vz,_fd);_q2.setFromAxisAngle(_vz,FPM.roll[arm]);g.quaternion.copy(_q1).multiply(_q2);g.scale.setScalar(FPM.sc[arm]*.8*(camera.aspect<.8?.78:1));
   const fa=FPM.arm[arm],r=.07*FPM.sc[arm]*(camera.aspect<.8?.8:1);
-  const cuffBack=.245*FPM.sc[arm]*.8;
+  const cuffBack=.27*FPM.sc[arm]*.8;
   _v3.copy(cp).addScaledVector(_fd,-cuffBack);_fk.copy(_v3).add(anc).multiplyScalar(.5);
   const fl=_v3.distanceTo(anc);fa.position.copy(_fk);fa.scale.set(r,fl,r);fa.quaternion.setFromUnitVectors(_vy,_fw.copy(_v3).sub(anc).normalize());
   const sl=FPM.sp[arm];sl.position.copy(_v3).addScaledVector(_fd,-.03);sl.scale.set(r*1.05,.05,r*1.05);sl.quaternion.copy(fa.quaternion);
@@ -3715,7 +3745,7 @@ function renderRoll(B){
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
 /* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
-const GAME_VER='v38';
+const GAME_VER='v40';
 /* в альбомной модель сдвигается влево, панель справа занимает ~54% */
 function lkScale(){
  if(camera.aspect<.8)return 1;
