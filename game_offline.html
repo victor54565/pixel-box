@@ -2972,18 +2972,19 @@ function fpTarget(h,out){
  const ext=hit?Math.max(.55,d-.3):Math.min(1.2,Math.max(.55,d-.3));
  out.copy(_v3).multiplyScalar(ext/d);return out}
 const _fk=new THREE.Vector3(),_fw=new THREE.Vector3(),_fd=new THREE.Vector3(),_fo=new THREE.Vector3();
+function fpNdc(nx,ny,z,o){const tv=Math.tan(camera.fov*Math.PI/360),th=tv*camera.aspect;return o.set(nx*th*-z,ny*tv*-z,z)}
 function fpPoseOf(h,arm,sx,gx,out){
- const k=h.kind,wf=gx/.34;
+ const k=h.kind,pt=camera.aspect<.8?.75:1;
  fpTarget(h,out.K);
  const K=out.K,W=out.W,C=out.C;
- if(k==='cross'){W.set(sx*.5*wf+sx*.1,-.5,-.26);K.x+=-sx*.05;C.set((W.x+K.x)/2,(W.y+K.y)/2-.04,(W.z+K.z)/2)}
- else if(k==='hook'){K.x+=sx*.22;W.set(sx*(1.15*wf+.15),K.y-.05,-.34);C.set(sx*(.75*wf+.1),K.y,K.z*.8)}
- else if(k==='upp'){W.set(sx*.26*wf+sx*.05,-1.05,-.3);K.y-=.06;K.x+=sx*.04;C.set(K.x+sx*.1,K.y-.55,K.z*.72)}
- else if(k==='over'){W.set(sx*.7*wf+sx*.1,.62,-.28);K.y+=.08;C.set(sx*.5*wf,K.y+.5,K.z*.6)}
- else{W.set(sx*.34*wf,-.3,-.4);C.set((W.x+K.x)/2,(W.y+K.y)/2,(W.z+K.z)/2)}
- out.roll=k==='hook'?-sx*1.4:(k==='upp'?sx*.5:(k==='over'?sx*.6:0));
- out.ext=k==='hook'?.22:k==='upp'?.22:k==='over'?.24:k==='cross'?.1:.08;
- out.frac=(k==='hook'||k==='upp'||k==='over')?.8:.6;
+ if(k==='cross'){fpNdc(sx*.62*pt,-.55,-.34,W);K.x+=-sx*.05;C.set((W.x+K.x)/2,(W.y+K.y)/2-.04,(W.z+K.z)/2)}
+ else if(k==='hook'){K.x+=sx*.16;fpNdc(sx*.92*pt,.0,-.42,W);W.y=K.y*.4-.02;fpNdc(sx*.86*pt,0,K.z*.82,C);C.y=K.y;C.z=K.z*.82}
+ else if(k==='upp'){fpNdc(sx*.38*pt,-.86,-.36,W);K.y-=.06;K.x+=sx*.04;C.set(K.x+sx*.06,K.y-.5,K.z*.7)}
+ else if(k==='over'){fpNdc(sx*.7*pt,.82,-.34,W);K.y+=.08;C.set(sx*.45*pt*.7,K.y+.45,K.z*.62)}
+ else{fpNdc(sx*.5*pt,-.5,-.4,W);C.set((W.x+K.x)/2,(W.y+K.y)/2,(W.z+K.z)/2)}
+ out.roll=k==='hook'?-sx*1.5:(k==='upp'?sx*.6:(k==='over'?sx*.7:0));
+ out.ext=k==='hook'?.2:k==='upp'?.2:k==='over'?.22:k==='cross'?.1:.08;
+ out.frac=(k==='hook'||k==='upp'||k==='over')?.5:.55;
  return out}
 const _pp={W:new THREE.Vector3(),K:new THREE.Vector3(),C:new THREE.Vector3(),roll:0,ext:.1,frac:.6};
 function fpArmState(arm,sx,gx,t,res){
@@ -3714,7 +3715,7 @@ function renderRoll(B){
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
 /* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
-const GAME_VER='v37';
+const GAME_VER='v38';
 /* в альбомной модель сдвигается влево, панель справа занимает ~54% */
 function lkScale(){
  if(camera.aspect<.8)return 1;
