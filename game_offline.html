@@ -2293,7 +2293,7 @@ function spd(type,spec){
  let m=S.speedAll*(P.rageT>0?.78:1)*(P.fxT.haste>0?P.fxV.haste:1);
  if(type==='jab')m*=S.spJab;else if(type==='hook')m*=S.spHook;else if(type==='upp')m*=S.spUpp;
  if(spec)m*=S.spSpec;
- if(G&&G.fps)m*=1.35;
+ if(G&&G.fps)m*=1.6;
  return Math.max(.16,m);
 }
 function cdOf(d){return d.buf?d.buf.cd:Math.round((3+(d.cost||20)*.16)*10)/10}
@@ -2977,14 +2977,15 @@ function fpPoseOf(h,arm,sx,gx,out){
  fpTarget(h,out.K);
  const K=out.K,W=out.W,C=out.C;
  if(k==='cross'){W.set(sx*.5*wf+sx*.1,-.5,-.26);K.x+=-sx*.05;C.set((W.x+K.x)/2,(W.y+K.y)/2-.04,(W.z+K.z)/2)}
- else if(k==='hook'){W.set(sx*(.95*wf+.1),-.12,-.42);K.x+=sx*.2;K.y+=.02;C.set(W.x*.9,K.y,K.z*.82)}
- else if(k==='upp'){W.set(sx*.3*wf+sx*.04,-.74,-.34);K.y-=.04;K.x+=sx*.04;C.set(W.x*.5+K.x*.5,W.y*.3+K.y*.7-.18,W.z*.5+K.z*.5)}
- else if(k==='over'){W.set(sx*.66*wf+sx*.1,.42,-.3);K.y+=.08;C.set(W.x*.8,K.y+.34,K.z*.62)}
+ else if(k==='hook'){K.x+=sx*.22;W.set(sx*(1.15*wf+.15),K.y-.05,-.34);C.set(sx*(.75*wf+.1),K.y,K.z*.8)}
+ else if(k==='upp'){W.set(sx*.26*wf+sx*.05,-1.05,-.3);K.y-=.06;K.x+=sx*.04;C.set(K.x+sx*.1,K.y-.55,K.z*.72)}
+ else if(k==='over'){W.set(sx*.7*wf+sx*.1,.62,-.28);K.y+=.08;C.set(sx*.5*wf,K.y+.5,K.z*.6)}
  else{W.set(sx*.34*wf,-.3,-.4);C.set((W.x+K.x)/2,(W.y+K.y)/2,(W.z+K.z)/2)}
- out.roll=k==='hook'?-sx*1.3:(k==='upp'?sx*.5:(k==='over'?sx*.5:0));
- out.ext=k==='hook'?.17:k==='upp'?.16:k==='over'?.19:k==='cross'?.1:.08;
+ out.roll=k==='hook'?-sx*1.4:(k==='upp'?sx*.5:(k==='over'?sx*.6:0));
+ out.ext=k==='hook'?.22:k==='upp'?.22:k==='over'?.24:k==='cross'?.1:.08;
+ out.frac=(k==='hook'||k==='upp'||k==='over')?.8:.6;
  return out}
-const _pp={W:new THREE.Vector3(),K:new THREE.Vector3(),C:new THREE.Vector3(),roll:0,ext:.1};
+const _pp={W:new THREE.Vector3(),K:new THREE.Vector3(),C:new THREE.Vector3(),roll:0,ext:.1,frac:.6};
 function fpArmState(arm,sx,gx,t,res){
  // base (no attack) pose
  const gp=new THREE.Vector3(sx*gx,-.2,-.62),r=res;
@@ -3005,7 +3006,7 @@ function fpArmState(arm,sx,gx,t,res){
   let prevP=gp.clone(),prevRoll=roll;
   for(let i=0;i<hs.length;i++){
    const h=hs[i];fpPoseOf(h,arm,sx,gx,_pp);
-   const ws=h.at-h.w,ext=Math.min(_pp.ext,h.w*.6),ss=h.at-ext,end=h.at+h.s+.05;
+   const ws=h.at-h.w,ext=Math.min(_pp.ext,h.w*_pp.frac),ss=h.at-ext,end=h.at+h.s+.05;
    if(t<ws){r.pos.copy(prevP);r.roll=prevRoll;return}
    if(t<ss){const u=eo(clamp((t-ws)/Math.max(.001,ss-ws),0,1));r.pos.lerpVectors(prevP,_pp.W,u);r.roll=prevRoll+(0-prevRoll)*u;r.sc=1.0+.1*u;return}
    if(t<end){const u0=clamp((t-ss)/Math.max(.001,ext),0,1),u=u0>=1?1:(h.kind==='jab'||h.kind==='cross'?eob(u0):eo(u0)*1.0);
@@ -3713,7 +3714,7 @@ function renderRoll(B){
 $('#mSty').onclick=()=>{sfx('ping');openSty()};
 $('#stBack').onclick=()=>{if(stBusy)return;sfx('ping');P.sty=curStyle();goMenu()};
 /* ========== НАСТРОЙКИ, РЕЗЕРВНАЯ КОПИЯ, ВРАЩЕНИЕ БОЙЦА ========== */
-const GAME_VER='v36';
+const GAME_VER='v37';
 /* в альбомной модель сдвигается влево, панель справа занимает ~54% */
 function lkScale(){
  if(camera.aspect<.8)return 1;
